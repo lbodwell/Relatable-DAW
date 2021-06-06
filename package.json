@@ -2,10 +2,34 @@
   "name": "relatable-daw",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "server": "nodemon server.js",
+    "client": "npm start --prefix client",
+    "client-install": "npm install --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
   },
-  "author": "",
-  "license": "ISC"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lbodwell/Relatable-DAW.git"
+  },
+  "author": "Luke Bodwell",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lbodwell/Relatable-DAW/issues"
+  },
+  "homepage": "https://github.com/lbodwell/Relatable-DAW#readme",
+  "devDependencies": {
+    "concurrently": "^6.2.0",
+    "nodemon": "^2.0.7"
+  },
+  "dependencies": {
+    "compression": "^1.7.4",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "helmet": "^4.6.0",
+    "method-override": "^3.0.0",
+    "morgan": "^1.10.0"
+  }
 }
