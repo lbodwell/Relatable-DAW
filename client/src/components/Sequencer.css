@@ -1,0 +1,4 @@
+.note-sequence {
+	display: grid;
+	gap: 8px;
+}

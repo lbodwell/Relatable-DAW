@@ -1,0 +1,9 @@
+.note-rectangle {
+	display: inline-block;
+	width: 100px;
+	height: 50px;
+}
+
+.note-rectangle:hover {
+	cursor: pointer;
+}
