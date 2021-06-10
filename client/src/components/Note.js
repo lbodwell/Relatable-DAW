@@ -1,12 +1,9 @@
 import "./Note.css";
 
 const Note = props => {
-	const noteClicked = () => {
-		console.log(props);
-	}
 	return (
 		<div className="note-rectangle">
-			<h1 style={{background: props.color}} onClick={noteClicked}>{props.id}</h1>
+			<h1 style={{background: props.note.color}} onClick={() => props.noteClicked(props.note)}>{props.note.id}</h1>
 		</div>
 	);
 }
