@@ -1,9 +1,10 @@
 .note-rectangle {
 	display: inline-block;
-	width: 100px;
-	height: 50px;
+	height: 48px;
+	/* border: 2px solid black; */
 }
 
 .note-rectangle:hover {
 	cursor: pointer;
+	filter: brightness(75%);
 }

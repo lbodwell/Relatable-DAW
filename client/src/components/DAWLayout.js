@@ -1,6 +1,6 @@
 import {useState} from "react";
-
 import {Grid, Cell} from "styled-css-grid";
+import * as Tone from "tone";
 
 import Sequencer from "./Sequencer";
 import KeyManager from "./KeyManager";
@@ -9,29 +9,39 @@ import Sidebar from "./Sidebar";
 const DAWLayout = () => {
 	const [keyCenter, setKeyCenter] = useState("C");
 	const [selectedNote, setSelectedNote] = useState(null);
+	const [playbackStatus, setPlaybackStatus] = useState("Paused");
 
-	const playMusic = evt => {
-		if (evt.target.innerHTML === "Play") {
-			evt.target.innerHTML = "Pause";
-			console.log("playing music");
-		} else if (evt.target.innerHTML === "Pause") {
-			evt.target.innerHTML = "Play";
-			console.log("pausing music");
+	const updatePlayback = async () => {
+		if (playbackStatus === "Paused") {
+			await Tone.start();
+			setPlaybackStatus("Playing");
+		} else if (playbackStatus === "Playing") {
+			setPlaybackStatus("Paused");
 		}
-		// TODO
 	};
+
+	const getPlaybackButtonText = () => {
+		let text = "Play";
+
+		if (playbackStatus === "Playing") {
+			text = "Pause";
+		}
+
+		return text;
+	};
+
 
 	return (
 		<div className="App">
 			<h1>Relatable DAW</h1>
 			<KeyManager keyCenter={keyCenter} keyChanged={setKeyCenter}/>
-			<button onClick={playMusic}>Play</button>
-			<Grid columns={2} gap="1px">
-				<Cell>
+			<button onClick={updatePlayback}>{getPlaybackButtonText()}</button>
+			<Grid columns={4} gap="1rem">
+				<Cell width={1}>
 					<Sidebar keyCenter={keyCenter} selectedNote={selectedNote}/>
 				</Cell>
-				<Cell>
-					<Sequencer keyCenter={keyCenter} selectedNote={selectedNote} noteSelected={setSelectedNote}/>
+				<Cell width={3}>
+					<Sequencer playbackStatus={playbackStatus} keyCenter={keyCenter} selectedNote={selectedNote} noteSelected={setSelectedNote}/>
 				</Cell>
 			</Grid>	
 		</div>
