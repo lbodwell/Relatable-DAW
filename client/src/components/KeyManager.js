@@ -3,7 +3,7 @@ const KeyManager = props => {
 
 	return (
 		<div>
-			<label htmlFor="key"></label>
+			<label htmlFor="key">Key: </label>
 			<select name="key" onChange={evt => props.keyChanged(evt.target.value)}>
 				{keys.map((key, index) => (
 					<option key={index} value={key}>{`${key} Major`}</option>

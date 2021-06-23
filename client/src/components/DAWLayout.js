@@ -9,6 +9,7 @@ import Sidebar from "./Sidebar";
 const DAWLayout = () => {
 	const [keyCenter, setKeyCenter] = useState("C");
 	const [selectedNote, setSelectedNote] = useState(null);
+	const [noteToDelete, setNoteToDelete] = useState(null);
 	const [playbackStatus, setPlaybackStatus] = useState("Paused");
 
 	const updatePlayback = async () => {
@@ -30,7 +31,6 @@ const DAWLayout = () => {
 		return text;
 	};
 
-
 	return (
 		<div className="App">
 			<h1>Relatable DAW</h1>
@@ -38,10 +38,10 @@ const DAWLayout = () => {
 			<button onClick={updatePlayback}>{getPlaybackButtonText()}</button>
 			<Grid columns={4} gap="1rem">
 				<Cell width={1}>
-					<Sidebar keyCenter={keyCenter} selectedNote={selectedNote}/>
+					<Sidebar keyCenter={keyCenter} selectedNote={selectedNote} noteUpdated={setSelectedNote} deleteRequested={setNoteToDelete}/>
 				</Cell>
 				<Cell width={3}>
-					<Sequencer playbackStatus={playbackStatus} keyCenter={keyCenter} selectedNote={selectedNote} noteSelected={setSelectedNote}/>
+					<Sequencer playbackStatus={playbackStatus} keyCenter={keyCenter} selectedNote={selectedNote} noteSelected={setSelectedNote} noteToDelete={noteToDelete} noteDeleted={setNoteToDelete}/>
 				</Cell>
 			</Grid>	
 		</div>

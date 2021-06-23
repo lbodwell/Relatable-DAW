@@ -28,6 +28,12 @@ const Sequencer = props => {
 	const [positions, setPositions] = useState([]);
 
 	useEffect(() => {
+		console.log("on load");
+		// TODO: add note sequence load from database
+		setSynth(new Tone.Synth().toDestination());
+	}, []);
+
+	useEffect(() => {
 		let newPitches = [];
 		noteSequence.forEach(note => {
 			let pitch;
@@ -45,7 +51,7 @@ const Sequencer = props => {
 			newPitches[note.id] = pitch;
 		});
 		setPitches(newPitches);
-	}, [noteSequence, props.keyCenter]);
+	}, [noteSequence, props]);
 
 	useEffect(() => {
 		let newPositions = [];
@@ -64,12 +70,32 @@ const Sequencer = props => {
 	}, [noteSequence, pitches]);
 
 	useEffect(() => {
-		console.log("on load");
-		setSynth(new Tone.Synth().toDestination());
-	}, []);
+		const targetNoteId = props.noteToDelete?.id;
+		if (!targetNoteId) {
+			return;
+		}
+
+		let children = [];
+		// TODO: also check children's children, etc.
+		noteSequence.forEach(note => {
+			if (note.relation.parent === targetNoteId) {
+				children.push(note);
+			}
+		});
+
+		if (children.length > 0) {
+			console.log(`This will delete ${children.length} children`);
+			// TODO: look into awaiting confirmation dialog
+
+			for (let i = children.length - 1; i >= 0; i--) {
+				// TODO: Use splice to mutate noteSequence removing all children then the parent
+			}
+		}
+	}, [noteSequence, props.noteToDelete]);
 
 	useEffect(() => {
 		const durationMappings = {0.5: "2n", 1: "4n", 2: "8n", 4: "1m"};
+		// ? Firing twice for some reason
 		console.log(props.playbackStatus);
 		Tone.Transport.pause();
 		if (props.playbackStatus === "Playing") {
