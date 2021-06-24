@@ -1,6 +1,7 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {Grid, Cell} from "styled-css-grid";
 import * as Tone from "tone";
+import {io} from "socket.io-client";
 
 import Sequencer from "./Sequencer";
 import KeyManager from "./KeyManager";
@@ -11,6 +12,19 @@ const DAWLayout = () => {
 	const [selectedNote, setSelectedNote] = useState(null);
 	const [noteToDelete, setNoteToDelete] = useState(null);
 	const [playbackStatus, setPlaybackStatus] = useState("Paused");
+
+	useEffect(() => {
+		const socket = io("http://localhost:5000");
+		socket.on("connection", message => {
+			console.log(message);
+		});
+		socket.on("disconnection", message => {
+			console.log(message);
+		});
+		socket.on("noteEdited", message => {
+			//TODO: implement 
+		});
+	  }, []);
 
 	const updatePlayback = async () => {
 		if (playbackStatus === "Paused") {

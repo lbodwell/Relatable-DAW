@@ -14,14 +14,14 @@ const Sequencer = props => {
 	const [synth, setSynth] = useState(null);
 
 	const [noteSequence, setNoteSequence] = useState([
-		{id: 0, color: "blue", duration: 2, relation: {parent: -1, interval: "1P"}},
-		{id: 1, color: "blue", duration: 1, relation: {parent: 0, interval: "3M"}},
-		{id: 2, color: "blue", duration: 1, relation: {parent: 1, interval: "-2M"}},
-		{id: 3, color: "blue", duration: 2, relation: {parent: -1, interval: "4P"}},
-		{id: 4, color: "blue", duration: 0.5, relation: {parent: -1, interval: "8P"}},
-		{id: 5, color: "blue", duration: 0.5, relation: {parent: 4, interval: "-2M"}},
-		{id: 6, color: "blue", duration: 1, relation: {parent: 3, interval: "1P"}},
-		{id: 7, color: "blue", duration: 4, relation: {parent: 6, interval: "-4P"}}
+		{id: 0, color: "blue", duration: 2, relation: {parent: -1, interval: "1P"}, children: [1, 3]},
+		{id: 1, color: "blue", duration: 1, relation: {parent: 0, interval: "3M"}, children: [2]},
+		{id: 2, color: "blue", duration: 1, relation: {parent: 1, interval: "-2M"}, children: []},
+		{id: 3, color: "blue", duration: 2, relation: {parent: 0, interval: "4P"}, children: [6]},
+		{id: 4, color: "blue", duration: 0.5, relation: {parent: -1, interval: "8P"}, children: [5]},
+		{id: 5, color: "blue", duration: 0.5, relation: {parent: 4, interval: "-2M"}, children: []},
+		{id: 6, color: "blue", duration: 1, relation: {parent: 3, interval: "1P"}, children: [7]},
+		{id: 7, color: "blue", duration: 4, relation: {parent: 6, interval: "-4P"}, children: []}
 	]);
 
 	const [pitches, setPitches] = useState([]);
@@ -89,6 +89,7 @@ const Sequencer = props => {
 
 			for (let i = children.length - 1; i >= 0; i--) {
 				// TODO: Use splice to mutate noteSequence removing all children then the parent
+
 			}
 		}
 	}, [noteSequence, props.noteToDelete]);
