@@ -74,55 +74,55 @@ app.use(passport.session());
 // Routing
 app.use("/auth/google", googleAuth.router);
 app.use("/api", apiRouter.router);
-//app.use(express.static(path.join(__dirname, "client", "build")));
+app.use(express.static(path.join(__dirname, "client", "build")));
+app.use(express.static("public"));
 
 // ! Temporary auth testing routes
 
-app.get("/", ensureAuthenticated, (req, res) => {
-	res.send("Home page");
-});
+// app.get("/", ensureAuthenticated, (req, res) => {
+// 	res.send("Home page");
+// });
 
-app.get("/login", (req, res) => {
-	res.send("Please login.");
-});
+// app.get("/login", (req, res) => {
+// 	res.send("Please login.");
+// });
 
-app.get("/logout", (req, res) => {
-	req.logout();
-	res.redirect("/login");
-});
-app.get("/account", (req, res) => {
-	if (req.isAuthenticated()) {
-		res.send(`Hello, ${req.user.displayName}!`);
+// app.get("/logout", (req, res) => {
+// 	req.logout();
+// 	res.redirect("/login");
+// });
+// app.get("/account", (req, res) => {
+// 	if (req.isAuthenticated()) {
+// 		res.send(`Hello, ${req.user.displayName}!`);
+// 	} else {
+// 		res.send("You are not logged in.");
+// 	}
+// });
+
+app.get("*", (req, res) => {
+	if (NODE_ENV === "production") {
+		res.sendFile(path.join(__dirname, "client", "build", "index.html"));
 	} else {
-		res.send("You are not logged in.");
+		res.send("Application is in development mode. Use the create-react-app dev server to see the frontend.");
 	}
 });
 
-// app.get("/", (req, res) => {
-// 	if (NODE_ENV === "production") {
-// 		res.sendFile(path.join(__dirname, "client", "build", "index.html"));
-// 	} else {
-// 		res.status(404).send("Error 404. Not found.");
-// 	}
-// });
-app.get("*", (req, res) => {
-	res.status(404).send("Error 404. Not found.");
-});
-
-// Web socket handling
+// Handle web sockets
 io.on("connection", socket => {
-	console.log("A user has connected");
-	socket.broadcast.emit("connection", "A user has connected");
-
-	socket.on("disconnect", () => {
-		console.log("A user has disconnected");
-		socket.broadcast.emit("disconnection", "A user has disconnected");
+	socket.on("join", ({user, projectId}) => {
+		// TODO: Add error handling for joining project
+		socket.join(projectId);
+		console.log(`${user} has connected to project id: ${projectId}.`);
+		socket.to(projectId).emit("connection", `${user} has connected to the project.`);
 	});
 
-	socket.on("noteEdited", message => {
-		const {user, projectId, newNote} = message;
-		// TODO: use project id to determine which room to emit to
-		socket.broadcast.emit("noteEdited", {user, newNote});
+	socket.on("disconnect", () => {
+		console.log("A user has disconnected.");
+	});
+
+	socket.on("noteEdited", ({user, projectId, newNote}) => {
+		console.log(`${user} has edited a note in project id: ${projectId}.`);
+		socket.to(projectId).emit("noteEdited2", {user, newNote});
 	});
 });
 

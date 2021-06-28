@@ -1,7 +1,7 @@
 import {useState, useEffect} from "react";
 import {Grid, Cell} from "styled-css-grid";
 
-import "../styles/NoteEditor.css";
+import "../styles/Sidebar.css";
 
 // TODO: Add option to include augmented (suffix: A) and diminished (suffix: d) intervals
 const intervalMappings = {
@@ -30,7 +30,7 @@ const durationMappings = {
 	0.25: "Sixteenth Note"
 };
 
-const NoteEditor = props => {
+const Sidebar = props => {
 	const {
 		selectedNote,
 		noteUpdated,
@@ -111,65 +111,68 @@ const NoteEditor = props => {
 	};
 
 	return (
-		<div className="sidebar">
-			<h1>Note Editor</h1>
-			<Grid columns={"8rem 8rem"} justifyContent="center">
-				<Cell>
-					<button onClick={addRequested}>Add Note</button>
-				</Cell>
-				<Cell>
-					<button onClick={clearRequested}>Clear Notes</button>
-				</Cell>
-			</Grid>
-			<h2>Selected note: {selectedNote?.id + 1 || "None"}</h2>
-			{selectedNote &&
-				<div className="relation-panel">
-					<h3>Relation</h3>
-					<Grid columns="1">
-						<Cell>
-							<label htmlFor="parent">Parent note: </label>
-							<select name="parent" value={currentParent} onChange={handleParentChange}>
-								<option key={0} value={-1}>Key Center</option>
-								{parentNotes?.map((id) => (
-									<option key={id} value={id}>{`Note ${id + 1}`}</option>
-								))}
-							</select>
-						</Cell>
-						<Cell>
-							<label htmlFor="interval">Interval: </label>
-							<select name="interval" value={currentInterval} onChange={handleIntervalChange}>
-								{Object.keys(intervalMappings).map((interval, index) => (
-									<option key={index} value={interval}>{intervalMappings[interval]}</option>
-								))}
-							</select>
-						</Cell>
-						<Cell>
-							{
-								//TODO: replace with switch component
-							}
-							<label htmlFor="direction">Direction: </label>
-							<select name="direction" value={currentDirection} onChange={handleDirectionChange}>
-								<option value={"UP"}>Up</option>
-								<option value={"DOWN"}>Down</option>
-							</select>
-						</Cell>
-					</Grid>
-					<h3>Timing</h3>
-					<Grid columns={1}>
-						<Cell>
-							<label htmlFor="duration">Duration: </label>
-							<select name="duration" value={currentDuration} onChange={handleDurationChange}>
-								{Object.keys(durationMappings).sort().reverse().map((duration, index) => (
-									<option key={index} value={duration}>{durationMappings[duration]}</option>
-								))}
-							</select>
-						</Cell>
-					</Grid>
-					<button onClick={() => deleteRequested(selectedNote)}>Delete Note</button>
-				</div>
-			}
-		</div>
+		<>
+			<h2>Project name</h2>
+			<div className="note-editor">
+				<h1>Note Editor</h1>
+				<Grid columns={"8rem 8rem"} justifyContent="center">
+					<Cell>
+						<button onClick={addRequested}>Add Note</button>
+					</Cell>
+					<Cell>
+						<button onClick={clearRequested}>Clear Notes</button>
+					</Cell>
+				</Grid>
+				<h2>Selected note: {selectedNote?.id + 1 || "None"}</h2>
+				{selectedNote &&
+					<div className="relation-panel">
+						<h3>Relation</h3>
+						<Grid columns="1">
+							<Cell>
+								<label htmlFor="parent">Parent note: </label>
+								<select name="parent" value={currentParent} onChange={handleParentChange}>
+									<option key={0} value={-1}>Key Center</option>
+									{parentNotes?.map((id) => (
+										<option key={id} value={id}>{`Note ${id + 1}`}</option>
+									))}
+								</select>
+							</Cell>
+							<Cell>
+								<label htmlFor="interval">Interval: </label>
+								<select name="interval" value={currentInterval} onChange={handleIntervalChange}>
+									{Object.keys(intervalMappings).map((interval, index) => (
+										<option key={index} value={interval}>{intervalMappings[interval]}</option>
+									))}
+								</select>
+							</Cell>
+							<Cell>
+								{
+									//TODO: replace with switch component
+								}
+								<label htmlFor="direction">Direction: </label>
+								<select name="direction" value={currentDirection} onChange={handleDirectionChange}>
+									<option value={"UP"}>Up</option>
+									<option value={"DOWN"}>Down</option>
+								</select>
+							</Cell>
+						</Grid>
+						<h3>Timing</h3>
+						<Grid columns={1}>
+							<Cell>
+								<label htmlFor="duration">Duration: </label>
+								<select name="duration" value={currentDuration} onChange={handleDurationChange}>
+									{Object.keys(durationMappings).sort().reverse().map((duration, index) => (
+										<option key={index} value={duration}>{durationMappings[duration]}</option>
+									))}
+								</select>
+							</Cell>
+						</Grid>
+						<button onClick={() => deleteRequested(selectedNote)}>Delete Note</button>
+					</div>
+				}
+			</div>
+		</>
 	);
 };
 
-export default NoteEditor;
+export default Sidebar;

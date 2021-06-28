@@ -1,7 +1,5 @@
 import {Grid, Cell} from "styled-css-grid";
 
-import "../styles/OptionsManager.css";
-
 const keys = [
 	"C",
 	"G",
@@ -18,11 +16,11 @@ const keys = [
 ];
 
 const OptionsManager = props => {
-	const {keyCenter, keyChanged, bpm, bpmChanged} = props;
+	const {keyCenter, keyChanged, bpm, bpmChanged, volume, volChanged} = props;
 	
 	return (
 		<div className="options">
-			<Grid columns={"8rem 12rem"} justifyContent="center" gap="2rem">
+			<Grid columns={"4rem 12rem 14rem"} gap="4rem">
 				<Cell center middle>
 					<Grid columns={2}>
 						<Cell>
@@ -44,6 +42,16 @@ const OptionsManager = props => {
 						</Cell>
 						<Cell>
 							<input name="bpm" type="range" value={bpm} min="60" max="200" onChange={evt => bpmChanged(evt.target.value)}/>
+						</Cell>
+					</Grid>
+				</Cell>
+				<Cell center middle>
+					<Grid columns={2}>
+						<Cell>
+							<label htmlFor="volume">Volume ({volume}):</label>
+						</Cell>
+						<Cell>
+							<input name="volume" type="range" value={volume} min="0" max="100" onChange={evt => volChanged(evt.target.value)}/>
 						</Cell>
 					</Grid>
 				</Cell>

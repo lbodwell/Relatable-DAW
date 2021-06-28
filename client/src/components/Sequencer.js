@@ -4,7 +4,7 @@ import {transpose} from "@tonaljs/core";
 import {Interval} from "@tonaljs/tonal";
 import * as Tone from "tone";
 
-import {usePrevious} from "../hooks";
+import {usePrev} from "../hooks";
 import Note from "./Note";
 
 import "../styles/Sequencer.css";
@@ -25,19 +25,19 @@ const Sequencer = props => {
 	
 	const [synth, setSynth] = useState(null);
 	const [noteSequence, setNoteSequence] = useState([
-		{id: 0, duration: 2, relation: {parent: -1, interval: "1P"}, children: [1, 3]},
-		{id: 1, duration: 1, relation: {parent: 0, interval: "3M"}, children: [2]},
-		{id: 2, duration: 1, relation: {parent: 1, interval: "-2M"}, children: []},
-		{id: 3, duration: 2, relation: {parent: 0, interval: "4P"}, children: [6]},
-		{id: 4, duration: 0.5, relation: {parent: -1, interval: "8P"}, children: [5]},
-		{id: 5, duration: 0.5, relation: {parent: 4, interval: "-2M"}, children: []},
-		{id: 6, duration: 1, relation: {parent: 3, interval: "1P"}, children: [7]},
-		{id: 7, duration: 4, relation: {parent: 6, interval: "-4P"}, children: []}
+		{id: 0, duration: 2, relation: {parent: -1, interval: "1P"}},
+		{id: 1, duration: 1, relation: {parent: 0, interval: "3M"}},
+		{id: 2, duration: 1, relation: {parent: 1, interval: "-2M"}},
+		{id: 3, duration: 2, relation: {parent: 0, interval: "4P"}},
+		{id: 4, duration: 0.5, relation: {parent: -1, interval: "8P"}},
+		{id: 5, duration: 0.5, relation: {parent: 4, interval: "-2M"}},
+		{id: 6, duration: 1, relation: {parent: 3, interval: "1P"}},
+		{id: 7, duration: 4, relation: {parent: 6, interval: "-4P"}}
 	]);
 	const [pitches, setPitches] = useState([]);
 	const [positions, setPositions] = useState([]);
 
-	const prevNote = usePrevious(selectedNote);
+	const prevNote = usePrev(selectedNote);
 
 	// Initial setup
 	useEffect(() => {
