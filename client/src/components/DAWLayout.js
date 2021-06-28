@@ -1,20 +1,22 @@
 import {useState, useEffect} from "react";
 import {Grid, Cell} from "styled-css-grid";
 import * as Tone from "tone";
-import {io} from "socket.io-client";
+import socket from "../socket-connection";
 
 import Sequencer from "./Sequencer";
-import KeyManager from "./KeyManager";
-import Sidebar from "./Sidebar";
+import OptionsManager from "./OptionsManager";
+import NoteEditor from "./NoteEditor";
 
 const DAWLayout = () => {
 	const [keyCenter, setKeyCenter] = useState("C");
+	const [bpm, setBpm] = useState(120);
 	const [selectedNote, setSelectedNote] = useState(null);
 	const [noteToDelete, setNoteToDelete] = useState(null);
+	const [noteAddRequested, setNoteAddRequested] = useState(false);
+	const [clearNotesRequested, setClearNotesRequested] = useState(false);
 	const [playbackStatus, setPlaybackStatus] = useState("Paused");
 
 	useEffect(() => {
-		const socket = io("http://localhost:5000");
 		socket.on("connection", message => {
 			console.log(message);
 		});
@@ -22,9 +24,19 @@ const DAWLayout = () => {
 			console.log(message);
 		});
 		socket.on("noteEdited", message => {
-			//TODO: implement 
+			const {user, newNote} = message;
+
+			console.log(`${user} edited a note`);
+			console.log(newNote);
+			// TODO: update note sequence
 		});
-	  }, []);
+	}, []);
+
+	const handleNoteUpdate = note => {
+		setSelectedNote(note);
+		const message = {user: "test-user-1", projectId: 0, newNote: note};
+		socket.emit("noteEdited", message);
+	};
 
 	const updatePlayback = async () => {
 		if (playbackStatus === "Paused") {
@@ -48,14 +60,31 @@ const DAWLayout = () => {
 	return (
 		<div className="App">
 			<h1>Relatable DAW</h1>
-			<KeyManager keyCenter={keyCenter} keyChanged={setKeyCenter}/>
+			<OptionsManager keyCenter={keyCenter} keyChanged={setKeyCenter} bpm={bpm} bpmChanged={setBpm}/>
 			<button onClick={updatePlayback}>{getPlaybackButtonText()}</button>
 			<Grid columns={4} gap="1rem">
 				<Cell width={1}>
-					<Sidebar keyCenter={keyCenter} selectedNote={selectedNote} noteUpdated={setSelectedNote} deleteRequested={setNoteToDelete}/>
+					<NoteEditor
+						selectedNote={selectedNote}
+						noteUpdated={handleNoteUpdate}
+						deleteRequested={setNoteToDelete}
+						addRequested={setNoteAddRequested}
+						clearRequested={setClearNotesRequested}
+					/>
 				</Cell>
 				<Cell width={3}>
-					<Sequencer playbackStatus={playbackStatus} keyCenter={keyCenter} selectedNote={selectedNote} noteSelected={setSelectedNote} noteToDelete={noteToDelete} noteDeleted={setNoteToDelete}/>
+					<Sequencer
+						selectedNote={selectedNote}
+						playbackStatus={playbackStatus}
+						keyCenter={keyCenter}
+						noteSelected={setSelectedNote}
+						noteToDelete={noteToDelete}
+						noteDeleted={setNoteToDelete}
+						doAddNote={noteAddRequested}
+						noteAdded={setNoteAddRequested}
+						doClearNotes={clearNotesRequested}
+						notesCleared={setClearNotesRequested}
+					/>
 				</Cell>
 			</Grid>	
 		</div>

@@ -1,9 +1,9 @@
-import "./Note.css";
+import "../styles/Note.css";
 
-const Note = props => {
+const Note = ({note, noteClicked}) => {
 	return (
 		<div className="note-rectangle">
-			<h1 style={{background: props.note.color, width: 48 * props.note.duration}} onClick={() => props.noteClicked(props.note)}>{props.note.id + 1}</h1>
+			<h1 style={{background: "blue", width: 48 * note.duration}} onClick={() => noteClicked(note)}>{note.id + 1}</h1>
 		</div>
 	);
 }

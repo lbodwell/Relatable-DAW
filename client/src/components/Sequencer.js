@@ -4,42 +4,56 @@ import {transpose} from "@tonaljs/core";
 import {Interval} from "@tonaljs/tonal";
 import * as Tone from "tone";
 
+import {usePrevious} from "../hooks";
 import Note from "./Note";
 
-import "./Sequencer.css";
+import "../styles/Sequencer.css";
 
 const Sequencer = props => {
-	// TODO: make more robust
-
+	const {
+		selectedNote,
+		playbackStatus,
+		keyCenter,
+		noteSelected,
+		noteToDelete,
+		noteDeleted,
+		doAddNote,
+		noteAdded,
+		doClearNotes,
+		notesCleared
+	} = props;
+	
 	const [synth, setSynth] = useState(null);
-
 	const [noteSequence, setNoteSequence] = useState([
-		{id: 0, color: "blue", duration: 2, relation: {parent: -1, interval: "1P"}, children: [1, 3]},
-		{id: 1, color: "blue", duration: 1, relation: {parent: 0, interval: "3M"}, children: [2]},
-		{id: 2, color: "blue", duration: 1, relation: {parent: 1, interval: "-2M"}, children: []},
-		{id: 3, color: "blue", duration: 2, relation: {parent: 0, interval: "4P"}, children: [6]},
-		{id: 4, color: "blue", duration: 0.5, relation: {parent: -1, interval: "8P"}, children: [5]},
-		{id: 5, color: "blue", duration: 0.5, relation: {parent: 4, interval: "-2M"}, children: []},
-		{id: 6, color: "blue", duration: 1, relation: {parent: 3, interval: "1P"}, children: [7]},
-		{id: 7, color: "blue", duration: 4, relation: {parent: 6, interval: "-4P"}, children: []}
+		{id: 0, duration: 2, relation: {parent: -1, interval: "1P"}, children: [1, 3]},
+		{id: 1, duration: 1, relation: {parent: 0, interval: "3M"}, children: [2]},
+		{id: 2, duration: 1, relation: {parent: 1, interval: "-2M"}, children: []},
+		{id: 3, duration: 2, relation: {parent: 0, interval: "4P"}, children: [6]},
+		{id: 4, duration: 0.5, relation: {parent: -1, interval: "8P"}, children: [5]},
+		{id: 5, duration: 0.5, relation: {parent: 4, interval: "-2M"}, children: []},
+		{id: 6, duration: 1, relation: {parent: 3, interval: "1P"}, children: [7]},
+		{id: 7, duration: 4, relation: {parent: 6, interval: "-4P"}, children: []}
 	]);
-
 	const [pitches, setPitches] = useState([]);
 	const [positions, setPositions] = useState([]);
 
+	const prevNote = usePrevious(selectedNote);
+
+	// Initial setup
 	useEffect(() => {
 		console.log("on load");
-		// TODO: add note sequence load from database
+		// TODO: Load note sequence from database
 		setSynth(new Tone.Synth().toDestination());
 	}, []);
 
+	// Pitch calculation
 	useEffect(() => {
 		let newPitches = [];
 		noteSequence.forEach(note => {
 			let pitch;
 			const {relation} = note;
 			if (relation.parent === -1) {
-				pitch = transpose(props.keyCenter + "4", relation.interval);
+				pitch = transpose(keyCenter + "4", relation.interval);
 			} else {
 				const parentPitch = newPitches[relation.parent];
 				if (parentPitch) {
@@ -51,8 +65,9 @@ const Sequencer = props => {
 			newPitches[note.id] = pitch;
 		});
 		setPitches(newPitches);
-	}, [noteSequence, props]);
+	}, [noteSequence, keyCenter]);
 
+	// Note positioning
 	useEffect(() => {
 		let newPositions = [];
 		if (pitches) {
@@ -69,8 +84,59 @@ const Sequencer = props => {
 		setPositions(newPositions);
 	}, [noteSequence, pitches]);
 
+	// Audio playback
 	useEffect(() => {
-		const targetNoteId = props.noteToDelete?.id;
+		const durationMappings = {0.25: "1n", 0.5: "2n", 1: "4n", 2: "8n", 4: "1m"};
+		// ? Firing twice for some reason
+		console.log(playbackStatus);
+		Tone.Transport.pause();
+		if (playbackStatus === "Playing") {
+			let test = [];
+			noteSequence.forEach(note => {
+				test.push({pitch: pitches[note.id], duration: durationMappings[note.duration]})
+			});
+			console.log(test);
+			const part = new Tone.Part((time, note) => {
+				synth.triggerAttackRelease(note.pitch, note.duration, time);
+			}, test);
+			Tone.Transport.start();
+			
+			//part.start();
+		}
+		
+	}, [noteSequence, pitches, playbackStatus, synth]);
+
+	useEffect(() => {
+		if (prevNote !== selectedNote && selectedNote != null) {
+			let newNoteSequence = [...noteSequence];
+			newNoteSequence[selectedNote.id] = selectedNote;
+			setNoteSequence(newNoteSequence);
+		}
+		
+	}, [noteSequence, selectedNote, prevNote]);
+
+	// Add new note
+	useEffect(() => {
+		if (doAddNote) {
+			const lastNote = noteSequence[noteSequence.length - 1];
+			const prevDuration = lastNote.duration;
+			const defaultRelation = {parent: lastNote.id, interval: "1P"};
+
+			const newNote = {
+				id: noteSequence.length,
+				duration: prevDuration,
+				relation: defaultRelation,
+				children: []
+			};
+			setNoteSequence([...noteSequence, newNote]);
+			noteAdded(false);
+			noteSelected(newNote);
+		}
+	}, [noteSequence, doAddNote, noteAdded, noteSelected]);
+
+	// Delete a note
+	useEffect(() => {
+		const targetNoteId = noteToDelete?.id;
 		if (!targetNoteId) {
 			return;
 		}
@@ -92,35 +158,28 @@ const Sequencer = props => {
 
 			}
 		}
-	}, [noteSequence, props.noteToDelete]);
+		noteDeleted(null);
+		noteSelected(null);
+	}, [noteSequence, noteToDelete, noteDeleted, noteSelected]);
 
+	// Clear all notes
 	useEffect(() => {
-		const durationMappings = {0.5: "2n", 1: "4n", 2: "8n", 4: "1m"};
-		// ? Firing twice for some reason
-		console.log(props.playbackStatus);
-		Tone.Transport.pause();
-		if (props.playbackStatus === "Playing") {
-			let test = [];
-			noteSequence.forEach(note => {
-				test.push({pitch: pitches[note.id], duration: durationMappings[note.duration]})
-			});
-			console.log(test);
-			const part = new Tone.Part((time, note) => {
-				synth.triggerAttackRelease(note.pitch, note.duration, time);
-			}, test);
-			Tone.Transport.start();
-			
-			//part.start();
+		if (doClearNotes) {
+			setNoteSequence([]);
+			notesCleared(false);
+			noteSelected(null);
 		}
-		
-	}, [noteSequence, pitches, props.playbackStatus, synth]);
+	}, [doClearNotes, notesCleared, noteSelected]);
 
 	return (
 		<div className="piano-roll">
+			{
+				//TODO: replace with pixel grid-based canvas rendering system
+			}
 			<Grid columns={240} rows={36} gap="0px">
 				{noteSequence.map(note => (
 					<Cell left={positions[note.id]?.horizontalPos} top={positions[note.id]?.verticalPos} key={note.id} width={8 * note.duration} height={1}>
-						<Note note={note} pitch={pitches?.[note.id]} noteClicked={props.noteSelected}/>
+						<Note note={note} pitch={pitches?.[note.id]} noteClicked={noteSelected}/>
 					</Cell>
 				))}
 			</Grid>

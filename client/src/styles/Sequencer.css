@@ -1,5 +1,5 @@
 .piano-roll {
+	margin-top: 1rem;
 	background-color: gray;
-	overflow-y:hidden;
 	height: 1728px;
 }
