@@ -135,29 +135,31 @@ const Sequencer = props => {
 	}, [noteSequence, doAddNote, noteAdded, noteSelected]);
 
 	// Delete a note
+	// TODO: Add id cascading for remaining notes after deletion and fix duplicate component key errors
 	useEffect(() => {
 		const targetNoteId = noteToDelete?.id;
 		if (!targetNoteId) {
 			return;
-		}
+		}  
 
-		let children = [];
-		// TODO: also check children's children, etc.
+		let targets = [targetNoteId];
 		noteSequence.forEach(note => {
-			if (note.relation.parent === targetNoteId) {
-				children.push(note);
+			if (targets.every(target => target.id !== note.id)) {
+				targets.forEach(target => {
+					if (note.relation.parent === target) {
+						targets.push(note.id);
+					}
+				})
 			}
 		});
 
-		if (children.length > 0) {
-			console.log(`This will delete ${children.length} children`);
+		if (targets.length > 0) {
+			console.log(`This will delete ${targets.length - 1} descendant notes`);
 			// TODO: look into awaiting confirmation dialog
-
-			for (let i = children.length - 1; i >= 0; i--) {
-				// TODO: Use splice to mutate noteSequence removing all children then the parent
-
-			}
 		}
+		const newNoteSequence = [...noteSequence].filter(note => !targets.includes(note.id));
+		setNoteSequence(newNoteSequence);
+
 		noteDeleted(null);
 		noteSelected(null);
 	}, [noteSequence, noteToDelete, noteDeleted, noteSelected]);
