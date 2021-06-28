@@ -3,13 +3,14 @@ import {Grid, Cell} from "styled-css-grid";
 
 import "../styles/NoteEditor.css";
 
+// TODO: Add option to include augmented (suffix: A) and diminished (suffix: d) intervals
 const intervalMappings = {
 	"1P": "Unison", 
 	"2m": "Minor 2nd",
 	"2M": "Major 2nd",
 	"3m": "Minor 3rd",
 	"3M": "Major 3rd", 
-	"4P": "Perfect 4th", 
+	"4P": "Perfect 4th",
 	"5P": "Perfect 5th",
 	"6m": "Minor 6th",
 	"6M": "Major 6th",

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const UserSchema = new Schema({
+const ProjectSchema = new Schema({
 	name: {
 		type: String,
 		required: true	
@@ -34,10 +34,19 @@ const UserSchema = new Schema({
 		required: true,
 		default: "C"
 	},
-	tempo: {
+	bpm: {
 		type: Number,
 		required: true,
 		default: 120
+	},
+	synth: {
+		type: Object,
+		required: true
+	},
+	effects: {
+		type: [Object],
+		required: true,
+		default: []
 	},
 	dateCreated: {
 		type: Date,
@@ -51,4 +60,4 @@ const UserSchema = new Schema({
 	}
 });
 
-module.exports = mongoose.model("Project", UserSchema);
+module.exports = mongoose.model("Project", ProjectSchema);

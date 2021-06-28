@@ -120,8 +120,9 @@ io.on("connection", socket => {
 	});
 
 	socket.on("noteEdited", message => {
-		const {user, id, newNote} = message;
-		io.emit("noteEdited", {user, id, newNote});
+		const {user, projectId, newNote} = message;
+		// TODO: use project id to determine which room to emit to
+		socket.broadcast.emit("noteEdited", {user, newNote});
 	});
 });
 
