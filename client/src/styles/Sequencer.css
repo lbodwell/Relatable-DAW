@@ -1,4 +1,5 @@
 .piano-roll {
-	background-color: gray;
-	height: 1728px;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
 }

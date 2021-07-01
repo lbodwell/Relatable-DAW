@@ -1,11 +1,10 @@
 import {useState, useEffect} from "react";
-import {Grid, Cell} from "styled-css-grid";
 import {transpose} from "@tonaljs/core";
 import {Interval} from "@tonaljs/tonal";
 import * as Tone from "tone";
 
 import {usePrev} from "../hooks";
-import Note from "./Note";
+import Row from "./Row";
 
 import "../styles/Sequencer.css";
 
@@ -36,12 +35,13 @@ const Sequencer = props => {
 	]);
 	const [pitches, setPitches] = useState([]);
 	const [positions, setPositions] = useState([]);
+	const [rows, setRows] = useState([]);
 
 	const prevNote = usePrev(selectedNote);
 
 	// Initial setup
 	useEffect(() => {
-		console.log("on load");
+		//console.log("on load");
 		// TODO: Load note sequence from database
 		setSynth(new Tone.Synth().toDestination());
 	}, []);
@@ -75,8 +75,8 @@ const Sequencer = props => {
 			noteSequence.forEach(note => {
 				// 36 is current max number of supported notes (C3-C6)
 				// Still needs some debugging
-				const horizontalPos = 8 * numBeats + 1;
-				const verticalPos = 36 - Interval.semitones(Interval.distance("C3", pitches[note.id]));
+				const horizontalPos = 4 * numBeats;
+				const verticalPos = -2 * Interval.semitones(Interval.distance("C6", pitches[note.id]));
 				newPositions[note.id] = {horizontalPos, verticalPos};
 				numBeats += note.duration;
 			});
@@ -84,11 +84,38 @@ const Sequencer = props => {
 		setPositions(newPositions);
 	}, [noteSequence, pitches]);
 
+	useEffect(() => {
+		const gridColor1 = "#555555";
+		const gridColor2 = "#1b1b1b";
+		
+		let newRows = [];
+		let color;
+		let positionsMap = [];
+
+		positions.forEach((pos, index) => {
+			positionsMap[pos.verticalPos] = [...positionsMap[pos.verticalPos] ?? [], {
+				id: index,
+				start: pos.horizontalPos,
+				length: noteSequence[index].duration * 4
+			}];
+			positionsMap[pos.verticalPos + 1] = positionsMap[pos.verticalPos];
+		});
+		//console.log(positionsMap);
+		
+		// TODO: don't hard code width and height
+		for (let i = 0; i < 72; i++) {
+			color = i % 4 <= 1 ? gridColor1 : gridColor2;
+			newRows.push(<Row key={i} width={128} backgroundColor={color} notePositions={positionsMap[i]}/>);
+		}
+
+		setRows(newRows);
+	}, [noteSequence, positions]);
+
 	// Audio playback
 	useEffect(() => {
 		const durationMappings = {0.25: "1n", 0.5: "2n", 1: "4n", 2: "8n", 4: "1m"};
 		// ? Firing twice for some reason
-		console.log(playbackStatus);
+		//console.log(playbackStatus);
 		Tone.Transport.pause();
 		if (playbackStatus === "Playing") {
 			let test = [];
@@ -175,16 +202,7 @@ const Sequencer = props => {
 
 	return (
 		<div className="piano-roll">
-			{
-				//TODO: replace with pixel grid-based canvas rendering system
-			}
-			<Grid columns={240} rows={36} gap="0px">
-				{noteSequence.map(note => (
-					<Cell left={positions[note.id]?.horizontalPos} top={positions[note.id]?.verticalPos} key={note.id} width={8 * note.duration} height={1}>
-						<Note note={note} pitch={pitches?.[note.id]} noteClicked={noteSelected}/>
-					</Cell>
-				))}
-			</Grid>
+			{rows}
 		</div>
 	);
 };

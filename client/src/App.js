@@ -12,7 +12,7 @@ import "./styles/App.css";
 const App = () => {
 	return (
 		<BrowserRouter>
-			<Switch>/
+			<Switch>
 				<Route exact path="/" component={HomePage}/>
 				<Route exact path="/project/:id" component={DAWLayout}/>
 			</Switch>

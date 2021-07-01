@@ -42,6 +42,10 @@ const DAWLayout = () => {
 		socket.emit("noteEdited", message);
 	};
 
+	const handleProjectNameUpdate = evt => {
+		setProjectName(evt.target.value);
+	};
+
 	const updatePlayback = async () => {
 		if (playbackStatus === "Paused") {
 			await Tone.start();
@@ -67,6 +71,8 @@ const DAWLayout = () => {
 			<Grid columns={4} gap="1rem">
 				<Cell width={1}>
 					<Sidebar
+						projectName={projectName}
+						projectNameChanged={handleProjectNameUpdate}
 						selectedNote={selectedNote}
 						noteUpdated={handleNoteUpdate}
 						deleteRequested={setNoteToDelete}
