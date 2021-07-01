@@ -1,4 +1,4 @@
-import {useState, useEffect} from "react";
+import {useState, useEffect, useCallback} from "react";
 import {transpose} from "@tonaljs/core";
 import {Interval} from "@tonaljs/tonal";
 import * as Tone from "tone";
@@ -38,6 +38,11 @@ const Sequencer = props => {
 	const [rows, setRows] = useState([]);
 
 	const prevNote = usePrev(selectedNote);
+
+	const handleNoteClick = useCallback(noteId => {
+		console.log("note id: " + noteId);
+		noteSelected(noteSequence[noteId]);
+	}, [noteSelected, noteSequence]);
 
 	// Initial setup
 	useEffect(() => {
@@ -105,11 +110,11 @@ const Sequencer = props => {
 		// TODO: don't hard code width and height
 		for (let i = 0; i < 72; i++) {
 			color = i % 4 <= 1 ? gridColor1 : gridColor2;
-			newRows.push(<Row key={i} width={128} backgroundColor={color} notePositions={positionsMap[i]}/>);
+			newRows.push(<Row key={i} width={128} backgroundColor={color} notePositions={positionsMap[i]} noteClicked={handleNoteClick}/>);
 		}
 
 		setRows(newRows);
-	}, [noteSequence, positions]);
+	}, [noteSequence, positions, handleNoteClick]);
 
 	// Audio playback
 	useEffect(() => {

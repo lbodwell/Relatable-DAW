@@ -1,28 +1,23 @@
-import React, { useState } from "react";
+import React, {useState, useEffect} from "react";
 import "../styles/Pixel.css";
 
 const Pixel = props => {
-	const {color} = props;
-	console.log(color);
+	const {color, noteId, noteClicked} = props;
 
 	const [pixelColor, setPixelColor] = useState(color);
 
-	const select = () => {
-		setPixelColor("#ffffff");
-	};
+	useEffect(() => {
+		setPixelColor(color);
+	}, [color, noteId]);
 
-	const mouseOver = () => {
-		//console.log("Moused over");
+	const handlePixelClick = () => {
+		if (noteId !== undefined) {
+			noteClicked(noteId);
+		}
 	};
 
 	return (
-		<div
-			className="pixel"
-			onClick={select}
-			onMouseEnter={mouseOver}
-			style={{backgroundColor: color}}
-		>	
-		</div>
+		<div className={noteId !== undefined ? "pixel note" : "pixel"} onClick={handlePixelClick} style={{backgroundColor: pixelColor}}/>
 	);
 };
 
