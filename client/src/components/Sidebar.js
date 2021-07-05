@@ -3,7 +3,6 @@ import {Grid, Cell} from "styled-css-grid";
 
 import "../styles/Sidebar.css";
 
-// TODO: Add option to include augmented (suffix: A) and diminished (suffix: d) intervals
 const intervalMappings = {
 	"1P": "Unison", 
 	"2m": "Minor 2nd",
@@ -11,6 +10,7 @@ const intervalMappings = {
 	"3m": "Minor 3rd",
 	"3M": "Major 3rd", 
 	"4P": "Perfect 4th",
+	"4A": "Tritone",
 	"5P": "Perfect 5th",
 	"6m": "Minor 6th",
 	"6M": "Major 6th",
@@ -46,6 +46,8 @@ const Sidebar = props => {
 	const [currentInterval, setCurrentInterval] = useState(undefined);
 	const [currentDirection, setCurrentDirection] = useState(undefined);
 	const [currentDuration, setCurrentDuration] = useState(undefined);
+	const [currentDelay, setCurrentDelay] = useState(undefined);
+	const [name, setName] = useState(projectName);
 	
 	useEffect(() => {
 		let prevNotes = [];
@@ -57,7 +59,19 @@ const Sidebar = props => {
 		setCurrentInterval(selectedNote?.relation.interval?.slice(-2));
 		setCurrentDirection(selectedNote?.relation.interval?.substring(0, 1) !== "-" ? "UP" : "DOWN");
 		setCurrentDuration(selectedNote?.duration);
+		setCurrentDelay(selectedNote?.delay);
 	}, [selectedNote]);
+
+	const handleNameChange = evt => {
+		setName(evt.target.value);
+	};
+
+	const handleKeyPress = evt => {
+		if (evt.key === "Enter") {
+			projectNameChanged(evt.target.value);
+			evt.target.blur();
+		}
+	};
 
 	const handleParentChange = evt => {
 		const newParent = evt.target.value;
@@ -76,6 +90,7 @@ const Sidebar = props => {
 	};
 
 	const handleDirectionChange = evt => {
+		// TODO: fix bug where after changing direction to down, sometimes it's impossible to change back to up
 		const newDirection = evt.target.value;
 		let newInterval = selectedNote.relation.interval;
 
@@ -109,13 +124,34 @@ const Sidebar = props => {
 		setCurrentDuration(newDuration);
 		let newNote = {...selectedNote};
 		newNote.duration = newDuration;
+
+		noteUpdated(newNote);
+	};
+
+	const handleDelayChange = evt => {
+		const newDelay = parseFloat(evt.target.value);
+
+		setCurrentDelay(newDelay);
+		let newNote = {...selectedNote};
+		newNote.delay = newDelay;
+
 		noteUpdated(newNote);
 	};
 
 	return (
 		<>
-			<label htmlFor="project-name">Project Name: </label>
-			<input name="project-name" type="text" value={projectName} onChange={projectNameChanged}></input>
+			<div className="center-text">
+				<label htmlFor="project-name">Project Name: </label>
+				<input
+					name="project-name" 
+					type="text" 
+					value={name} 
+					onChange={handleNameChange} 
+					onBlur={evt => projectNameChanged(evt.target.value)}
+					onKeyPress={handleKeyPress}
+				/>
+			</div>
+			
 			<div className="note-editor">
 				<h1>Note Editor</h1>
 				<Grid columns={"8rem 8rem"} justifyContent="center">
@@ -126,7 +162,7 @@ const Sidebar = props => {
 						<button onClick={clearRequested}>Clear Notes</button>
 					</Cell>
 				</Grid>
-				<h2>Selected note: {selectedNote?.id + 1 || "None"}</h2>
+				<h2>Selected Note: {selectedNote?.id + 1 || "None"}</h2>
 				{selectedNote &&
 					<div className="relation-panel">
 						<h3>Relation</h3>
@@ -169,8 +205,17 @@ const Sidebar = props => {
 									))}
 								</select>
 							</Cell>
+							<Cell>
+								<label htmlFor="delay">Delay: </label>
+								<select name="delay" value={currentDelay} onChange={handleDelayChange}>
+									<option key={0} value={0}>None</option>
+									{Object.keys(durationMappings).sort().reverse().map((duration, index) => (
+										<option key={index + 1} value={duration}>{durationMappings[duration]}</option>
+									))}
+								</select>
+							</Cell>
 						</Grid>
-						<button onClick={() => deleteRequested(selectedNote)}>Delete Note</button>
+						<button className="btn-delete" onClick={() => deleteRequested(selectedNote)}>Delete Note</button>
 					</div>
 				}
 			</div>

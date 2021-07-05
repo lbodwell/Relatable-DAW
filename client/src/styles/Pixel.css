@@ -6,3 +6,7 @@
 .note:hover {
 	cursor: pointer;
 }
+
+.selected {
+	filter: brightness(50%);
+}

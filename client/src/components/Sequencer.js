@@ -8,6 +8,9 @@ import Row from "./Row";
 
 import "../styles/Sequencer.css";
 
+// 12 notes in one octave times 5 octaves (C3-C6 inclusive) plus 1 for C7 all times 2 rows per note 
+const numRows = (12 * 4 + 1) * 2;
+
 const Sequencer = props => {
 	const {
 		selectedNote,
@@ -24,14 +27,14 @@ const Sequencer = props => {
 	
 	const [synth, setSynth] = useState(null);
 	const [noteSequence, setNoteSequence] = useState([
-		{id: 0, duration: 2, relation: {parent: -1, interval: "1P"}},
-		{id: 1, duration: 1, relation: {parent: 0, interval: "3M"}},
-		{id: 2, duration: 1, relation: {parent: 1, interval: "-2M"}},
-		{id: 3, duration: 2, relation: {parent: 0, interval: "4P"}},
-		{id: 4, duration: 0.5, relation: {parent: -1, interval: "8P"}},
-		{id: 5, duration: 0.5, relation: {parent: 4, interval: "-2M"}},
-		{id: 6, duration: 1, relation: {parent: 3, interval: "1P"}},
-		{id: 7, duration: 4, relation: {parent: 6, interval: "-4P"}}
+		{id: 0, duration: 2, delay: 0, relation: {parent: -1, interval: "1P"}},
+		{id: 1, duration: 1, delay: 0, relation: {parent: 0, interval: "3M"}},
+		{id: 2, duration: 1, delay: 0, relation: {parent: 1, interval: "-2M"}},
+		{id: 3, duration: 2, delay: 1, relation: {parent: 0, interval: "4P"}},
+		{id: 4, duration: 0.5, delay: 0, relation: {parent: -1, interval: "8P"}},
+		{id: 5, duration: 0.5, delay: 0.5, relation: {parent: 4, interval: "-2M"}},
+		{id: 6, duration: 1, delay: 0, relation: {parent: 3, interval: "1P"}},
+		{id: 7, duration: 4, delay: 0.25, relation: {parent: 6, interval: "-4P"}}
 	]);
 	const [pitches, setPitches] = useState([]);
 	const [positions, setPositions] = useState([]);
@@ -39,10 +42,7 @@ const Sequencer = props => {
 
 	const prevNote = usePrev(selectedNote);
 
-	const handleNoteClick = useCallback(noteId => {
-		console.log("note id: " + noteId);
-		noteSelected(noteSequence[noteId]);
-	}, [noteSelected, noteSequence]);
+	const handleNoteClick = useCallback(noteId => noteSelected(noteSequence[noteId]), [noteSelected, noteSequence]);
 
 	// Initial setup
 	useEffect(() => {
@@ -58,7 +58,7 @@ const Sequencer = props => {
 			let pitch;
 			const {relation} = note;
 			if (relation.parent === -1) {
-				pitch = transpose(keyCenter + "4", relation.interval);
+				pitch = transpose(keyCenter + "5", relation.interval);
 			} else {
 				const parentPitch = newPitches[relation.parent];
 				if (parentPitch) {
@@ -78,10 +78,9 @@ const Sequencer = props => {
 		if (pitches) {
 			let numBeats = 0;
 			noteSequence.forEach(note => {
-				// 36 is current max number of supported notes (C3-C6)
-				// Still needs some debugging
+				numBeats += note.delay;
 				const horizontalPos = 4 * numBeats;
-				const verticalPos = -2 * Interval.semitones(Interval.distance("C6", pitches[note.id]));
+				const verticalPos = -2 * Interval.semitones(Interval.distance("C7", pitches[note.id]));
 				newPositions[note.id] = {horizontalPos, verticalPos};
 				numBeats += note.duration;
 			});
@@ -89,28 +88,23 @@ const Sequencer = props => {
 		setPositions(newPositions);
 	}, [noteSequence, pitches]);
 
+	// Prepare piano roll grid rows for rendering
 	useEffect(() => {
-		const gridColor1 = "#555555";
-		const gridColor2 = "#1b1b1b";
-		
 		let newRows = [];
-		let color;
 		let positionsMap = [];
 
 		positions.forEach((pos, index) => {
 			positionsMap[pos.verticalPos] = [...positionsMap[pos.verticalPos] ?? [], {
 				id: index,
 				start: pos.horizontalPos,
-				length: noteSequence[index].duration * 4
+				length: noteSequence[index]?.duration * 4
 			}];
 			positionsMap[pos.verticalPos + 1] = positionsMap[pos.verticalPos];
 		});
-		//console.log(positionsMap);
 		
-		// TODO: don't hard code width and height
-		for (let i = 0; i < 72; i++) {
-			color = i % 4 <= 1 ? gridColor1 : gridColor2;
-			newRows.push(<Row key={i} width={128} backgroundColor={color} notePositions={positionsMap[i]} noteClicked={handleNoteClick}/>);
+		for (let i = 0; i < numRows; i++) {
+			// TODO: Calculate width based off current note sequence with extra buffer of one measure
+			newRows.push({rowId: i, width: 128, notePositions: positionsMap[i]});
 		}
 
 		setRows(newRows);
@@ -138,6 +132,7 @@ const Sequencer = props => {
 		
 	}, [noteSequence, pitches, playbackStatus, synth]);
 
+	// Update note sequence on edit
 	useEffect(() => {
 		if (prevNote !== selectedNote && selectedNote != null) {
 			let newNoteSequence = [...noteSequence];
@@ -150,21 +145,22 @@ const Sequencer = props => {
 	// Add new note
 	useEffect(() => {
 		if (doAddNote) {
-			const lastNote = noteSequence[noteSequence.length - 1];
-			const prevDuration = lastNote.duration;
-			const defaultRelation = {parent: lastNote.id, interval: "1P"};
-
+			const defaultParent = selectedNote ?? noteSequence[noteSequence.length - 1];
 			const newNote = {
 				id: noteSequence.length,
-				duration: prevDuration,
-				relation: defaultRelation,
-				children: []
+				duration: selectedNote ? selectedNote.duration : 1,
+				delay: 0,
+				relation: {
+					parent: defaultParent.id,
+					interval: "1P"
+				}
 			};
+
 			setNoteSequence([...noteSequence, newNote]);
 			noteAdded(false);
 			noteSelected(newNote);
 		}
-	}, [noteSequence, doAddNote, noteAdded, noteSelected]);
+	}, [noteSequence, selectedNote, doAddNote, noteAdded, noteSelected]);
 
 	// Delete a note
 	// TODO: Add id cascading for remaining notes after deletion and fix duplicate component key errors
@@ -190,6 +186,7 @@ const Sequencer = props => {
 			// TODO: look into awaiting confirmation dialog
 		}
 		const newNoteSequence = [...noteSequence].filter(note => !targets.includes(note.id));
+		console.log(newNoteSequence);
 		setNoteSequence(newNoteSequence);
 
 		noteDeleted(null);
@@ -207,7 +204,16 @@ const Sequencer = props => {
 
 	return (
 		<div className="piano-roll">
-			{rows}
+			{rows.map((row, index) => (
+				<Row
+					key={index}
+					rowId={row.rowId}
+					width={row.width}
+					notePositions={row.notePositions}
+					selectedNote={selectedNote}
+					noteClicked={handleNoteClick}
+				/>
+			))}
 		</div>
 	);
 };
