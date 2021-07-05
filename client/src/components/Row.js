@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from "react";
+
 import {Interval} from "@tonaljs/tonal";
 
 import Pixel from "./Pixel";

@@ -6,3 +6,8 @@
 	overflow-y: scroll;
 	height: 80vh;
 }
+
+::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+}

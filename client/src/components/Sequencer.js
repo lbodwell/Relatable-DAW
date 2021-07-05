@@ -1,9 +1,13 @@
 import {useState, useEffect, useCallback} from "react";
+
+import ScrollContainer from "react-indiana-drag-scroll";
+
 import {transpose} from "@tonaljs/core";
 import {Interval} from "@tonaljs/tonal";
 import * as Tone from "tone";
 
 import {usePrev} from "../hooks";
+
 import Row from "./Row";
 
 import "../styles/Sequencer.css";
@@ -215,7 +219,7 @@ const Sequencer = props => {
 	}, [doClearNotes, notesCleared, noteSelected]);
 
 	return (
-		<div className="piano-roll">
+		<ScrollContainer className="piano-roll" hideScrollbars={false}>
 			{rows.map((row, index) => (
 				<Row
 					key={index}
@@ -227,7 +231,7 @@ const Sequencer = props => {
 					noteClicked={handleNoteClick}
 				/>
 			))}
-		</div>
+		</ScrollContainer>
 	);
 };
 

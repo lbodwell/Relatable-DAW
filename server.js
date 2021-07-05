@@ -9,11 +9,7 @@ const morgan = require("morgan");
 const compression = require("compression");
 const methodOverride = require("method-override");
 const helmet = require("helmet");
-const session = require("express-session");
-const passport = require("passport");
 
-const passportConfig = require("./config/passport-config");
-const googleAuth = require("./routes/auth/google-auth");
 const apiRouter = require("./routes/api/api-router");
 
 const app = express();
@@ -25,16 +21,12 @@ const io = socketio(server, {
 		methods: ["GET", "POST"]
 	  }
 });
-const {ensureAuthenticated} = passportConfig;
 
 // Configure environment variables
 dotenv.config();
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV;
 const MONGO_URI = process.env.MONGO_URI;
-
-// Configure passport sessions
-passportConfig.setupPassport();
 
 // Connect to database
 try {
@@ -63,41 +55,11 @@ app.use(helmet({
 app.use(compression());
 app.use(express.json());
 app.use(methodOverride());
-app.use(session({
-	secret: "workstationofdigitalaudio",
-	resave: false,
-	saveUninitialized: false
-}));
-app.use(passport.initialize());
-app.use(passport.session());
 
 // Routing
-app.use("/auth/google", googleAuth.router);
 app.use("/api", apiRouter.router);
 app.use(express.static(path.join(__dirname, "client", "build")));
 app.use(express.static("public"));
-
-// ! Temporary auth testing routes
-
-// app.get("/", ensureAuthenticated, (req, res) => {
-// 	res.send("Home page");
-// });
-
-// app.get("/login", (req, res) => {
-// 	res.send("Please login.");
-// });
-
-// app.get("/logout", (req, res) => {
-// 	req.logout();
-// 	res.redirect("/login");
-// });
-// app.get("/account", (req, res) => {
-// 	if (req.isAuthenticated()) {
-// 		res.send(`Hello, ${req.user.displayName}!`);
-// 	} else {
-// 		res.send("You are not logged in.");
-// 	}
-// });
 
 app.get("*", (req, res) => {
 	if (NODE_ENV === "production") {

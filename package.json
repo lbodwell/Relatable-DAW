@@ -1,40 +1,39 @@
 {
-  "name": "relatable-daw",
-  "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "server": "nodemon server.js",
-    "client": "npm start --prefix client",
-    "client-install": "npm install --prefix client",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lbodwell/Relatable-DAW.git"
-  },
-  "author": "Luke Bodwell",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/lbodwell/Relatable-DAW/issues"
-  },
-  "homepage": "https://github.com/lbodwell/Relatable-DAW#readme",
-  "devDependencies": {
-    "concurrently": "^6.2.0",
-    "nodemon": "^2.0.7"
-  },
-  "dependencies": {
-    "compression": "^1.7.4",
-    "dotenv": "^10.0.0",
-    "express": "^4.17.1",
-    "express-session": "^1.17.2",
-    "helmet": "^4.6.0",
-    "method-override": "^3.0.0",
-    "mongoose": "^5.12.14",
-    "morgan": "^1.10.0",
-    "passport": "^0.4.1",
-    "passport-google-oauth2": "^0.2.0",
-    "socket.io": "^4.1.2"
-  }
+	"name": "relatable-daw",
+	"version": "1.0.0",
+	"description": "",
+	"main": "server.js",
+	"scripts": {
+		"start": "node server.js",
+		"server": "nodemon server.js",
+		"client": "npm start --prefix client",
+		"client-install": "npm install --prefix client",
+		"dev": "concurrently \"npm run server\" \"npm run client\""
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lbodwell/Relatable-DAW.git"
+	},
+	"author": "Luke Bodwell",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/lbodwell/Relatable-DAW/issues"
+	},
+	"homepage": "https://github.com/lbodwell/Relatable-DAW#readme",
+	"devDependencies": {
+		"concurrently": "^6.2.0",
+		"nodemon": "^2.0.7"
+	},
+	"dependencies": {
+		"compression": "^1.7.4",
+		"dotenv": "^10.0.0",
+		"express": "^4.17.1",
+		"express-session": "^1.17.2",
+		"google-auth-library": "^7.2.0",
+		"helmet": "^4.6.0",
+		"method-override": "^3.0.0",
+		"mongoose": "^5.12.14",
+		"morgan": "^1.10.0",
+		"socket.io": "^4.1.2"
+	}
 }

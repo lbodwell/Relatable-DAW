@@ -1,11 +1,14 @@
 import {useState, useEffect} from "react";
 import {useParams} from "react-router-dom";
+
 import {Grid, Cell} from "styled-css-grid";
+
 import * as Tone from "tone";
 
 import Sequencer from "./Sequencer";
-import OptionsManager from "./OptionsManager";
 import Sidebar from "./Sidebar";
+import OptionsManager from "./OptionsManager";
+
 import socket from "../socket-connection";
 
 const DAWLayout = () => {

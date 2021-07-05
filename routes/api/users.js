@@ -1,10 +1,8 @@
 const express = require("express");
 
 const User = require("../../models/User");
-const passportConfig = require("../../config/passport-config");
 
 const router = express.Router();
-const {ensureAuthenticated, getUsername} = passportConfig;
 
 /*
  * Route: /api/users
@@ -12,9 +10,9 @@ const {ensureAuthenticated, getUsername} = passportConfig;
  * Auth: Required
  * Desc: Gets the current user based on the session.
  */
-router.get("/", ensureAuthenticated, async (req, res) => {
+router.get("/", async (req, res) => {
 	// Gather request parameters
-	const username = getUsername(req);
+	const username = "placeholder";
 
 	try {
 		// Find the user with the given username
@@ -76,9 +74,9 @@ router.get("/:id", async (req, res) => {
  * Auth: Required
  * Desc: Adds a new user with the display name and username determined by the session.
  */
-router.post("/", ensureAuthenticated, async (req, res) => {
+router.post("/", async (req, res) => {
 	// Gather request parameters
-	const username = getUsername(req);
+	const username = "placeholder";
 	const {displayName} = req.user;
 
 	try {
@@ -99,9 +97,9 @@ router.post("/", ensureAuthenticated, async (req, res) => {
  * Auth: Required
  * Desc: Deletes the current user determined by the session.
  */
-router.delete("/", ensureAuthenticated, async (req, res) => {
+router.delete("/", async (req, res) => {
 	// Gather request parameters
-	const username = getUsername(req);
+	const username = "placeholder";
 
 	try {
 		// Find and delete the user with the given username
