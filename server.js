@@ -122,7 +122,7 @@ io.on("connection", socket => {
 
 	socket.on("noteEdited", ({user, projectId, newNote}) => {
 		console.log(`${user} has edited a note in project id: ${projectId}.`);
-		socket.to(projectId).emit("noteEdited2", {user, newNote});
+		socket.to(projectId).emit("noteEdited", {user, newNote});
 	});
 });
 

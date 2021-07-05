@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from "react";
+import {Interval} from "@tonaljs/tonal";
 
 import Pixel from "./Pixel";
 
@@ -23,9 +24,19 @@ const noteColors = [
 ];
 
 const Row = props => {
-	const {rowId, width, notePositions, selectedNote, noteClicked} = props;
-	const [pixels, setPixels] = useState([]);
+	const {
+		rowId,
+		width,
+		notePositions,
+		keyCenter,
+		selectedNote,
+		noteClicked
+	} = props;
+	
 	const backgroundColor = rowId % 4 <= 1 ? gridColor1 : gridColor2;
+	const offset = Interval.semitones(Interval.distance("C5", keyCenter + "5"));
+
+	const [pixels, setPixels] = useState([]);
 
 	useEffect(() => {
 		let newPixels = [];
@@ -42,7 +53,7 @@ const Row = props => {
 				for (let j = 0; j < notePositions.length; j++) {
 					let note = notePositions[j];
 					if (i === note.start) {
-						color = noteColors[Math.floor(rowId / 2) % 12];
+						color = noteColors[(Math.floor(rowId / 2) + offset) % 12];
 						pixelsLeft = note.length - 1;
 						noteId = note.id;
 					}
@@ -52,7 +63,7 @@ const Row = props => {
 		}
 
 		setPixels(newPixels);
-	}, [rowId, width, backgroundColor, notePositions, noteClicked]);
+	}, [rowId, width, keyCenter, notePositions, noteClicked, backgroundColor, offset]);
 
 	return (
 		<div className="row">

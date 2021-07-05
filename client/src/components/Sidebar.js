@@ -84,29 +84,6 @@ const Sidebar = props => {
 
 	const handleIntervalChange = evt => {
 		const newInterval = evt.target.value;
-
-		setCurrentInterval(newInterval);
-		updateInterval(newInterval);
-	};
-
-	const handleDirectionChange = evt => {
-		// TODO: fix bug where after changing direction to down, sometimes it's impossible to change back to up
-		const newDirection = evt.target.value;
-		let newInterval = selectedNote.relation.interval;
-
-		if (newDirection === "UP") {
-			newInterval = newInterval.substring(1);
-		} else if (newDirection === "DOWN") {
-			newInterval = `-${newInterval}`;
-		} else {
-			console.error("Invalid direction value");
-		}
-
-		setCurrentDirection(newDirection);
-		updateInterval(newInterval);
-	};
-
-	const updateInterval = newInterval => {
 		let newNote = {...selectedNote};
 
 		let prefix = "";
@@ -115,6 +92,26 @@ const Sidebar = props => {
 		}
 		newNote.relation.interval = prefix + newInterval;
 
+		setCurrentInterval(newInterval);
+		noteUpdated(newNote);
+	};
+
+	const handleDirectionChange = evt => {
+		const newDirection = evt.target.value;
+		let newNote = {...selectedNote};
+		let newInterval = newNote.relation.interval;
+
+		if (newDirection === "UP") {
+			newInterval = newInterval.substring(1);
+		} else if (newDirection === "DOWN") {
+			newInterval = `-${newInterval}`;
+		} else {
+			console.error("Invalid direction value");
+		}
+		newNote.relation.interval = newInterval;
+
+		setCurrentDirection(newDirection);
+		setCurrentInterval(newInterval);
 		noteUpdated(newNote);
 	};
 

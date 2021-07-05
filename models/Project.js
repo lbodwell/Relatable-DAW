@@ -12,13 +12,13 @@ const ProjectSchema = new Schema({
 		ref: "User",
 		required: true
 	},
-	viewers: {
+	editors: {
 		type: [Schema.Types.ObjectId],
 		ref: "User",
 		required: true,
 		default: []
 	},
-	editors: {
+	viewers: {
 		type: [Schema.Types.ObjectId],
 		ref: "User",
 		required: true,
@@ -38,6 +38,11 @@ const ProjectSchema = new Schema({
 		type: Number,
 		required: true,
 		default: 120
+	},
+	volume: {
+		type: Number,
+		required: true,
+		default: 100
 	},
 	synth: {
 		type: Object,

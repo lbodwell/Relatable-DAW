@@ -29,10 +29,10 @@ const DAWLayout = () => {
 			console.log(message);
 		});
 
-		socket.on("noteEdited2", ({user, newNote}) => {
+		socket.on("noteEdited", ({user, newNote}) => {
 			console.log(`${user} edited a note. The updated note is:`);
 			console.log(newNote);
-			// TODO: update note sequence
+			setSelectedNote(newNote);
 		});
 	}, [id]);
 
@@ -95,6 +95,8 @@ const DAWLayout = () => {
 								selectedNote={selectedNote}
 								playbackStatus={playbackStatus}
 								keyCenter={keyCenter}
+								bpm={bpm}
+								volume={volume}
 								noteSelected={setSelectedNote}
 								noteToDelete={noteToDelete}
 								noteDeleted={setNoteToDelete}

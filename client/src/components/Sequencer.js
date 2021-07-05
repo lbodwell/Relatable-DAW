@@ -8,8 +8,10 @@ import Row from "./Row";
 
 import "../styles/Sequencer.css";
 
-// 12 notes in one octave times 5 octaves (C3-C6 inclusive) plus 1 for C7 all times 2 rows per note 
+// 12 notes in one octave times 5 full octaves (C3-C6) plus 1 for C7, all times 2 rows per note
 const numRows = (12 * 4 + 1) * 2;
+// 4 beats per measure times 8 measures times 4 "pixels" per beat
+const minSequencerLength = 4 * 8 * 4;
 
 const Sequencer = props => {
 	const {
@@ -39,6 +41,7 @@ const Sequencer = props => {
 	const [pitches, setPitches] = useState([]);
 	const [positions, setPositions] = useState([]);
 	const [rows, setRows] = useState([]);
+	const [sequencerLength, setSequencerLength] = useState(minSequencerLength);
 
 	const prevNote = usePrev(selectedNote);
 
@@ -54,9 +57,11 @@ const Sequencer = props => {
 	// Pitch calculation
 	useEffect(() => {
 		let newPitches = [];
+
 		noteSequence.forEach(note => {
 			let pitch;
 			const {relation} = note;
+
 			if (relation.parent === -1) {
 				pitch = transpose(keyCenter + "5", relation.interval);
 			} else {
@@ -67,14 +72,17 @@ const Sequencer = props => {
 					console.error("Parent pitch undefined");
 				}
 			}
+
 			newPitches[note.id] = pitch;
 		});
+
 		setPitches(newPitches);
 	}, [noteSequence, keyCenter]);
 
 	// Note positioning
 	useEffect(() => {
 		let newPositions = [];
+
 		if (pitches) {
 			let numBeats = 0;
 			noteSequence.forEach(note => {
@@ -84,7 +92,11 @@ const Sequencer = props => {
 				newPositions[note.id] = {horizontalPos, verticalPos};
 				numBeats += note.duration;
 			});
+
+			const numBeatsPlusOffset = Math.ceil(numBeats / 4) * 4 + 4;
+			setSequencerLength(Math.max(4 * numBeatsPlusOffset, minSequencerLength));
 		}
+
 		setPositions(newPositions);
 	}, [noteSequence, pitches]);
 
@@ -103,8 +115,7 @@ const Sequencer = props => {
 		});
 		
 		for (let i = 0; i < numRows; i++) {
-			// TODO: Calculate width based off current note sequence with extra buffer of one measure
-			newRows.push({rowId: i, width: 128, notePositions: positionsMap[i]});
+			newRows.push({rowId: i, notePositions: positionsMap[i]});
 		}
 
 		setRows(newRows);
@@ -137,9 +148,9 @@ const Sequencer = props => {
 		if (prevNote !== selectedNote && selectedNote != null) {
 			let newNoteSequence = [...noteSequence];
 			newNoteSequence[selectedNote.id] = selectedNote;
+
 			setNoteSequence(newNoteSequence);
 		}
-		
 	}, [noteSequence, selectedNote, prevNote]);
 
 	// Add new note
@@ -166,6 +177,7 @@ const Sequencer = props => {
 	// TODO: Add id cascading for remaining notes after deletion and fix duplicate component key errors
 	useEffect(() => {
 		const targetNoteId = noteToDelete?.id;
+
 		if (!targetNoteId) {
 			return;
 		}  
@@ -177,7 +189,7 @@ const Sequencer = props => {
 					if (note.relation.parent === target) {
 						targets.push(note.id);
 					}
-				})
+				});
 			}
 		});
 
@@ -185,8 +197,8 @@ const Sequencer = props => {
 			console.log(`This will delete ${targets.length - 1} descendant notes`);
 			// TODO: look into awaiting confirmation dialog
 		}
+
 		const newNoteSequence = [...noteSequence].filter(note => !targets.includes(note.id));
-		console.log(newNoteSequence);
 		setNoteSequence(newNoteSequence);
 
 		noteDeleted(null);
@@ -208,8 +220,9 @@ const Sequencer = props => {
 				<Row
 					key={index}
 					rowId={row.rowId}
-					width={row.width}
+					width={sequencerLength}
 					notePositions={row.notePositions}
+					keyCenter={keyCenter}
 					selectedNote={selectedNote}
 					noteClicked={handleNoteClick}
 				/>
