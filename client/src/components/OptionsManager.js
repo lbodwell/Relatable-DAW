@@ -1,4 +1,4 @@
-import {Grid, Cell} from "styled-css-grid";
+import {Cell, Grid} from "styled-css-grid";
 
 import "../styles/OptionsManager.css"
 

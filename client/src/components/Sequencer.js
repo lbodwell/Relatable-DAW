@@ -1,4 +1,4 @@
-import {useState, useEffect, useCallback} from "react";
+import {useCallback, useEffect, useState} from "react";
 
 import ScrollContainer from "react-indiana-drag-scroll";
 
@@ -123,7 +123,7 @@ const Sequencer = props => {
 		}
 
 		setRows(newRows);
-	}, [noteSequence, positions, handleNoteClick]);
+	}, [noteSequence, positions]);
 
 	// Audio playback
 	useEffect(() => {
@@ -163,10 +163,10 @@ const Sequencer = props => {
 			const defaultParent = selectedNote ?? noteSequence[noteSequence.length - 1];
 			const newNote = {
 				id: noteSequence.length,
-				duration: selectedNote ? selectedNote.duration : 1,
+				duration: selectedNote?.duration ?? 1,
 				delay: 0,
 				relation: {
-					parent: defaultParent.id,
+					parent: defaultParent?.id ?? -1,
 					interval: "1P"
 				}
 			};

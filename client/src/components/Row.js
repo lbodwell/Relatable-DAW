@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import {useEffect, useState} from "react";
 
 import {Interval} from "@tonaljs/tonal";
 
@@ -11,8 +11,8 @@ const gridColor2 = "#1b1b1b";
 
 const noteColors = [
 	"#FF0000",
-	"#FF00FF",
 	"#FF69B4",
+	"#FF00FF",
 	"#800080",
 	"#4B0082",
 	"#0000FF",
@@ -79,6 +79,6 @@ const Row = props => {
 			))}
 		</div>
 	);
-};
+};         
 
 export default Row;

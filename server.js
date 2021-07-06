@@ -6,11 +6,13 @@ const socketio = require("socket.io");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
+const cors = require("cors");
 const compression = require("compression");
 const methodOverride = require("method-override");
 const helmet = require("helmet");
-
-const apiRouter = require("./routes/api/api-router");
+const session = require("express-session");
+const cookieParser = require("cookie-parser");
+const apiRouter = require("./api/api-router");
 
 const app = express();
 const server = http.createServer(app);
@@ -19,7 +21,7 @@ const io = socketio(server, {
 	cors: {
 		origin: "http://localhost:3000",
 		methods: ["GET", "POST"]
-	  }
+	}
 });
 
 // Configure environment variables
@@ -32,7 +34,8 @@ const MONGO_URI = process.env.MONGO_URI;
 try {
 	mongoose.connect(MONGO_URI, {
 		useNewUrlParser: true, 
-		useUnifiedTopology: true
+		useUnifiedTopology: true,
+		useFindAndModify: false
 	}).then(() => console.log("Connected to database"));
 } catch (err) {
 	console.error(err);
@@ -49,11 +52,22 @@ if (NODE_ENV === "development") {
 }
 
 // Middleware processing
+app.use(cors({
+	origin: "http://localhost:3000"
+}));
 app.use(helmet({
 	contentSecurityPolicy: false
 }));
+app.use(session({
+	secret: "itsasecret",
+	resave: false,
+	saveUninitialized: true,
+	// ! Uncomment for production over SSL
+	// cookie: { secure: true }
+}))
 app.use(compression());
 app.use(express.json());
+app.use(cookieParser())
 app.use(methodOverride());
 
 // Routing

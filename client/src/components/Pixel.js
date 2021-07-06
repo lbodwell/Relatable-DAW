@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import {useEffect, useState} from "react";
 
 import "../styles/Pixel.css";
 
@@ -13,13 +13,11 @@ const Pixel = props => {
 	const [pixelColor, setPixelColor] = useState(color);
 
 	useEffect(() => setPixelColor(color), [color, noteId]);
-
-	const handlePixelClick = () => noteClicked(noteId);
-
+	
 	return (
 		<div
 			className={noteId !== undefined ? (noteId === selectedNote?.id ? "pixel note selected" : "pixel note") : "pixel"}
-			onClick={handlePixelClick}
+			onClick={() => noteClicked(noteId)}
 			style={{backgroundColor: pixelColor}}
 		/>
 	);

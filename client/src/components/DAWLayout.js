@@ -1,7 +1,7 @@
-import {useState, useEffect} from "react";
+import {useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 
-import {Grid, Cell} from "styled-css-grid";
+import {Cell, Grid} from "styled-css-grid";
 
 import * as Tone from "tone";
 
@@ -11,7 +11,9 @@ import OptionsManager from "./OptionsManager";
 
 import socket from "../socket-connection";
 
-const DAWLayout = () => {
+const DAWLayout = props => {
+	const {user, loggedOut} = props;
+	
 	const [projectName, setProjectName] = useState("New Project");
 	const [keyCenter, setKeyCenter] = useState("C");
 	const [bpm, setBpm] = useState(120);
@@ -28,15 +30,9 @@ const DAWLayout = () => {
 		// Handle web sockets
 		socket.emit("join", {user: "test-user-1", projectId: id});
 
-		socket.on("connection", message => {
-			console.log(message);
-		});
+		socket.on("connection", message => console.log(message));
 
-		socket.on("noteEdited", ({user, newNote}) => {
-			console.log(`${user} edited a note. The updated note is:`);
-			console.log(newNote);
-			setSelectedNote(newNote);
-		});
+		socket.on("noteEdited", ({user, newNote}) => setSelectedNote(newNote));
 	}, [id]);
 
 	const handleNoteUpdate = note => {
@@ -80,7 +76,7 @@ const DAWLayout = () => {
 					/>
 				</Cell>
 				<Cell width={3}>
-					<Grid rows={"2rem 1rem 1fr"} columns={1} justifyContent="start" alignContent="start" gap={"1rem"}>
+					<Grid rows={"1rem 1fr"} columns={1} justifyContent="start" alignContent="start" gap={"1rem"}>
 						<Cell>
 							<OptionsManager
 								keyCenter={keyCenter}
