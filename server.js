@@ -7,12 +7,11 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 const cors = require("cors");
+const session = require("express-session");
 const compression = require("compression");
 const methodOverride = require("method-override");
 const helmet = require("helmet");
-const session = require("express-session");
-const cookieParser = require("cookie-parser");
-const apiRouter = require("./api/api-router");
+const apiRouter = require("./routes/api-router");
 
 const app = express();
 const server = http.createServer(app);
@@ -53,7 +52,8 @@ if (NODE_ENV === "development") {
 
 // Middleware processing
 app.use(cors({
-	origin: "http://localhost:3000"
+	origin: "http://localhost:3000",
+	credentials: true
 }));
 app.use(helmet({
 	contentSecurityPolicy: false
@@ -64,10 +64,9 @@ app.use(session({
 	saveUninitialized: true,
 	// ! Uncomment for production over SSL
 	// cookie: { secure: true }
-}))
+}));
 app.use(compression());
 app.use(express.json());
-app.use(cookieParser())
 app.use(methodOverride());
 
 // Routing

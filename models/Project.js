@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const ProjectSchema = new Schema({
 	name: {
 		type: String,
-		required: true	
+		required: true
 	},
 	owner: {
 		type: Schema.Types.ObjectId,
@@ -46,7 +46,8 @@ const ProjectSchema = new Schema({
 	},
 	synth: {
 		type: Object,
-		required: true
+		required: true,
+		default: {waveType: "sine"}
 	},
 	effects: {
 		type: [Object],

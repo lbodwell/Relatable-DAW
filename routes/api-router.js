@@ -1,7 +1,7 @@
 const express = require("express");
 
-const users = require("./users");
-const projects = require("./projects");
+const users = require("./api/users");
+const projects = require("./api/projects");
 const auth = require("./auth");
 
 const router = express.Router();

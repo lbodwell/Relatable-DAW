@@ -18,14 +18,19 @@ const App = () => {
 		console.log(user);
 	}, [user]);
 
+	const logOut = () => setUser(null);
+
 	return (
 		<BrowserRouter>
 			<Switch>
 				<Route exact path="/">
-					<HomePage user={user} authenticated={setUser}/>
+					<HomePage user={user} loggedIn={setUser} loggedOut={logOut}/>
 				</Route>
 				<Route exact path="/project/:id">
-					<DAWLayout user={user} loggedOut={() => setUser(null)}/>
+					<DAWLayout user={user} loggedOut={logOut}/>
+				</Route>
+				<Route exact path="/guest">
+					<DAWLayout guestMode={true}/>
 				</Route>
 			</Switch>
 		</BrowserRouter>
