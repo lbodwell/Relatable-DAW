@@ -3,6 +3,7 @@ const express = require("express");
 const {ensureAuthenticated} = require("../auth");
 const {
 	getProjects,
+	getProject,
 	addProject,
 	updateProject,
 	deleteProject
@@ -15,6 +16,21 @@ router.get("/", ensureAuthenticated, async (req, res) => {
 
 	try {
 		const projects = await getProjects({owner: userId});
+
+		res.status(200).json(projects);
+	} catch (err) {
+		console.error(err);
+		res.status(500);
+	}
+});
+
+router.get("/:id", ensureAuthenticated, async (req, res) => {
+	const userId = req.user._id;
+	const projectId = req.params.id;
+	console.log(projectId);
+
+	try {
+		const projects = await getProject({_id: projectId, owner: userId});
 
 		res.status(200).json(projects);
 	} catch (err) {

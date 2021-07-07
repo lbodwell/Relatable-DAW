@@ -15,18 +15,13 @@ const apiRouter = require("./routes/api-router");
 
 const app = express();
 const server = http.createServer(app);
-const io = socketio(server, {
-	// ! Remove for production
-	cors: {
-		origin: "http://localhost:3000",
-		methods: ["GET", "POST"]
-	}
-});
 
 // Configure environment variables
 dotenv.config();
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV;
+const FRONTEND_APP_URL = process.env.FRONTEND_APP_URL;
+const SESSION_SECRET = process.env.SESSION_SECRET;
 const MONGO_URI = process.env.MONGO_URI;
 
 // Connect to database
@@ -52,18 +47,21 @@ if (NODE_ENV === "development") {
 
 // Middleware processing
 app.use(cors({
-	origin: "http://localhost:3000",
-	credentials: true
+	credentials: true,
+	origin: FRONTEND_APP_URL,
 }));
 app.use(helmet({
 	contentSecurityPolicy: false
 }));
 app.use(session({
-	secret: "itsasecret",
-	resave: false,
-	saveUninitialized: true,
-	// ! Uncomment for production over SSL
-	// cookie: { secure: true }
+	secret: SESSION_SECRET,
+	resave: true,
+	saveUninitialized: false,
+	// ! This is needed to prevent cookie issues but causes API routes to fail
+	// cookie: {
+	// 	sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+	// 	secure: process.env.NODE_ENV === "production"
+	// }
 }));
 app.use(compression());
 app.use(express.json());
@@ -78,26 +76,33 @@ app.get("*", (req, res) => {
 	if (NODE_ENV === "production") {
 		res.sendFile(path.join(__dirname, "client", "build", "index.html"));
 	} else {
-		res.send("Application is in development mode. Use the create-react-app dev server to see the frontend.");
+		res.send("Error 404");
 	}
 });
 
 // Handle web sockets
+const io = socketio(server, {
+	cors: {
+		origin: FRONTEND_APP_URL,
+		methods: ["GET", "POST"]
+	}
+});
+
 io.on("connection", socket => {
-	socket.on("join", ({user, projectId}) => {
+	socket.on("join", ({username, projectId}) => {
 		// TODO: Add error handling for joining project
 		socket.join(projectId);
-		console.log(`${user} has connected to project id: ${projectId}.`);
-		socket.to(projectId).emit("connection", `${user} has connected to the project.`);
+		if (NODE_ENV === "development") {
+			console.log(`${username} has connected to project id: ${projectId}`);
+		}
+		socket.to(projectId).emit("connection", `${username} has connected to the project.`);
 	});
 
-	socket.on("disconnect", () => {
-		console.log("A user has disconnected.");
-	});
-
-	socket.on("noteEdited", ({user, projectId, newNote}) => {
-		console.log(`${user} has edited a note in project id: ${projectId}.`);
-		socket.to(projectId).emit("noteEdited", {user, newNote});
+	socket.on("noteEdited", ({username, projectId, newNote}) => {
+		if (NODE_ENV === "development") {
+			console.log(`${username} has edited a note in project id: ${projectId}.`);
+		}
+		socket.to(projectId).emit("noteEdited", {username, newNote});
 	});
 });
 

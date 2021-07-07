@@ -1,5 +1,5 @@
-import {useEffect, useState} from "react";
-import {useParams} from "react-router-dom";
+import {useCallback, useEffect, useState} from "react";
+import {useHistory, useParams} from "react-router-dom";
 
 import {Cell, Grid} from "styled-css-grid";
 
@@ -13,32 +13,74 @@ import socket from "../socket-connection";
 
 const DAWLayout = props => {
 	const {user, loggedOut} = props;
-	
-	const [projectName, setProjectName] = useState("New Project");
-	const [keyCenter, setKeyCenter] = useState("C");
-	const [bpm, setBpm] = useState(120);
-	const [volume, setVolume] = useState(100);
+
+	const [projectName, setProjectName] = useState();
+	const [initNoteSequence, setInitNoteSequence] = useState();
+	const [keyCenter, setKeyCenter] = useState();
+	const [bpm, setBpm] = useState();
+	const [volume, setVolume] = useState();
 	const [selectedNote, setSelectedNote] = useState(null);
 	const [noteToDelete, setNoteToDelete] = useState(null);
 	const [noteAddRequested, setNoteAddRequested] = useState(false);
 	const [clearNotesRequested, setClearNotesRequested] = useState(false);
 	const [playbackStatus, setPlaybackStatus] = useState("Paused");
 
-	const {id} = useParams();
+	const history = useHistory();
+
+	const {projectId} = useParams();
+
+	const fetchProject = useCallback(async id => {
+		const res = await fetch(`http://localhost:5000/api/projects/${id}`, {
+			method: "GET",
+			credentials: "include"
+		});
+
+		const project = await res.json();
+		if (project) {
+			console.log(project);
+			setProjectName(project.name);
+			setKeyCenter(project.keyCenter);
+			setBpm(project.bpm);
+			setVolume(project.volume);
+			setInitNoteSequence(project.noteSequence);
+		} else {
+			console.error("Failed to access project");
+		}
+	}, []);
+
+	useEffect(() => {
+		if (projectId) {
+			if (user) {
+				fetchProject(projectId);
+			} else {
+				history.push("/");
+			}
+		}
+		
+	}, [user, projectId, fetchProject, history]);
 
 	useEffect(() => {
 		// Handle web sockets
-		socket.emit("join", {user: "test-user-1", projectId: id});
+		if (user) {
+			socket.emit("join", {username: user.name, projectId});
 
-		socket.on("connection", message => console.log(message));
+			socket.on("connection", message => console.log(message));
 
-		socket.on("noteEdited", ({user, newNote}) => setSelectedNote(newNote));
-	}, [id]);
+			socket.on("noteEdited", ({newNote}) => setSelectedNote(newNote));
+		}
+	}, [user, projectId]);
 
 	const handleNoteUpdate = note => {
 		setSelectedNote(note);
-		const message = {user: "test-user-1", projectId: id, newNote: note};
-		socket.emit("noteEdited", message);
+		
+		if (user) {
+			const message = {
+				username: user.name,
+				projectId,
+				newNote: note
+			};
+			socket.emit("noteEdited", message);
+		}
 	};
 
 	const updatePlayback = async () => {
@@ -91,6 +133,7 @@ const DAWLayout = props => {
 						</Cell>
 						<Cell>
 							<Sequencer
+								initNoteSequence={initNoteSequence}
 								selectedNote={selectedNote}
 								playbackStatus={playbackStatus}
 								keyCenter={keyCenter}
@@ -107,7 +150,7 @@ const DAWLayout = props => {
 						</Cell>
 					</Grid>
 				</Cell>
-			</Grid>	
+			</Grid>
 		</>
 	);
 };

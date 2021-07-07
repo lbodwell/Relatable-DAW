@@ -19,6 +19,7 @@ const minSequencerLength = 4 * 8 * 4;
 
 const Sequencer = props => {
 	const {
+		initNoteSequence,
 		selectedNote,
 		playbackStatus,
 		keyCenter,
@@ -32,16 +33,7 @@ const Sequencer = props => {
 	} = props;
 	
 	const [synth, setSynth] = useState(null);
-	const [noteSequence, setNoteSequence] = useState([
-		{id: 0, duration: 2, delay: 0, relation: {parent: -1, interval: "1P"}},
-		{id: 1, duration: 1, delay: 0, relation: {parent: 0, interval: "3M"}},
-		{id: 2, duration: 1, delay: 0, relation: {parent: 1, interval: "-2M"}},
-		{id: 3, duration: 2, delay: 1, relation: {parent: 0, interval: "4P"}},
-		{id: 4, duration: 0.5, delay: 0, relation: {parent: -1, interval: "8P"}},
-		{id: 5, duration: 0.5, delay: 0.5, relation: {parent: 4, interval: "-2M"}},
-		{id: 6, duration: 1, delay: 0, relation: {parent: 3, interval: "1P"}},
-		{id: 7, duration: 4, delay: 0.25, relation: {parent: 6, interval: "-4P"}}
-	]);
+	const [noteSequence, setNoteSequence] = useState([]);
 	const [pitches, setPitches] = useState([]);
 	const [positions, setPositions] = useState([]);
 	const [rows, setRows] = useState([]);
@@ -54,9 +46,14 @@ const Sequencer = props => {
 	// Initial setup
 	useEffect(() => {
 		//console.log("on load");
-		// TODO: Load note sequence from database
 		setSynth(new Tone.Synth().toDestination());
 	}, []);
+
+	useEffect(() => {
+		if (initNoteSequence) {
+			setNoteSequence(initNoteSequence);
+		}
+	}, [initNoteSequence]);
 
 	// Pitch calculation
 	useEffect(() => {

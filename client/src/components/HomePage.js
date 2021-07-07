@@ -1,21 +1,20 @@
-import {useEffect, useState} from "react";
-
+import {useCallback, useEffect, useState} from "react";
+import {useHistory} from "react-router-dom";
 import {GoogleLogin, GoogleLogout} from "react-google-login";
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const HomePage = props => {
-	const {user, loggedIn, loggedOut, projectSelected} = props;
+	const {user, loggedIn, loggedOut} = props;
 
 	const [projects, setProjects] = useState([]);
 
-	const fetchProjects = async () => {
+	const history = useHistory();
+
+	const fetchProjects = useCallback(async () => {
 		const res = await fetch("http://localhost:5000/api/projects", {
 			method: "GET",
-			credentials: "include",
-			headers: {
-				"Content-Type": "application/json"
-			}
+			credentials: "include"
 		});
 
 		const data = await res.json();
@@ -24,19 +23,15 @@ const HomePage = props => {
 		} else {
 			console.error("Failed to login");
 		}
-	}
+	}, []);
 
 	useEffect(() => {
 		if (user) {
 			fetchProjects();
 		}
-	}, [user]);
+	}, [user, fetchProjects]);
 
-	useEffect(() => {
-		console.log(projects);
-	}, [projects]);
-
-	const handleLogin = async googleData => {
+	const handleLoginSuccess = async googleData => {
 		const res = await fetch("http://localhost:5000/api/auth/google", {
 			method: "POST",
 			credentials: "include",
@@ -56,13 +51,15 @@ const HomePage = props => {
 		}
 	};
 
+	const handleLoginFailure = err => {
+		alert("Failed to log in!");
+		console.error(err);
+	};
+
 	const createNewProject = async () => {
 		const res = await fetch("http://localhost:5000/api/projects", {
 			method: "POST",
-			credentials: "include",
-			headers: {
-				"Content-Type": "application/json"
-			}
+			credentials: "include"
 		});
 
 		const data = await res.json();
@@ -76,14 +73,10 @@ const HomePage = props => {
 	const deleteProject = async projectId => {
 		const res = await fetch(`http://localhost:5000/api/projects/${projectId}`, {
 			method: "DELETE",
-			credentials: "include",
-			headers: {
-				"Content-Type": "application/json"
-			}
+			credentials: "include"
 		});
 
 		const data = await res.json();
-		console.log(data);
 		if (data) {
 			setProjects(data)
 		} else {
@@ -91,8 +84,12 @@ const HomePage = props => {
 		}
 	};
 
-	const goToProject = projectId => {
-		console.log("redirect to project " + projectId);
+	const navigateToProject = projectId => {
+		if (projectId !== null) {
+			history.push(`/project/${projectId}`);
+		} else {
+			history.push("/guest");
+		}
 	};
 
 	return (
@@ -111,7 +108,7 @@ const HomePage = props => {
 					<ul>
 						{projects?.map((project, index) => (
 							<li key={index}>
-								<button onClick={() => goToProject(project._id)}>{project.name}</button>
+								<button onClick={() => navigateToProject(project._id)}>{project.name}</button>
 								<button onClick={() => deleteProject(project._id)}>Delete</button>
 							</li>
 						))}
@@ -122,11 +119,12 @@ const HomePage = props => {
 					<GoogleLogin
 						clientId={CLIENT_ID}
 						buttonText="Log in with Google"
-						onSuccess={handleLogin}
-						onFailure={handleLogin}
+						onSuccess={handleLoginSuccess}
+						onFailure={handleLoginFailure}
 						isSignedIn={true}
 						cookiePolicy={"single_host_origin"}
 					/>
+					<button onClick={() => navigateToProject(null)}>Continue as guest</button>
 				</div>
 			}
 		</div>

@@ -63,6 +63,10 @@ const Sidebar = props => {
 		setCurrentDelay(selectedNote?.delay);
 	}, [selectedNote]);
 
+	useEffect(() => {
+		setName(projectName);
+	}, [projectName]);
+
 	const handleNameChange = evt => {
 		setName(evt.target.value);
 	};
@@ -140,6 +144,7 @@ const Sidebar = props => {
 		<>
 			<div className="center-text">
 				<label htmlFor="project-name">Project Name: </label>
+				{/* Controlled component error */}
 				<input
 					name="project-name" 
 					type="text" 
@@ -162,7 +167,7 @@ const Sidebar = props => {
 				</Grid>
 				<h2>Selected Note: {selectedNote?.id + 1 || "None"}</h2>
 				{selectedNote &&
-					<div className="relation-panel">
+					<div>
 						<h3>Relation</h3>
 						<Grid columns="1">
 							<Cell>

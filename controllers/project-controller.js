@@ -8,6 +8,14 @@ const getProjects = async filter => {
 	}
 };
 
+const getProject = async filter => {
+	try {
+		return await Project.findOne(filter);
+	} catch (err) {
+		console.error(err);
+	}
+};
+
 const addProject = async userId => {
 	try {
 		const numProjects = await Project.countDocuments({});
@@ -44,6 +52,7 @@ const deleteProject = async (userId, projectId) => {
 
 module.exports = {
 	getProjects,
+	getProject,
 	addProject,
 	updateProject,
 	deleteProject

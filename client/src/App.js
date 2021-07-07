@@ -26,11 +26,11 @@ const App = () => {
 				<Route exact path="/">
 					<HomePage user={user} loggedIn={setUser} loggedOut={logOut}/>
 				</Route>
-				<Route exact path="/project/:id">
+				<Route exact path="/project/:projectId">
 					<DAWLayout user={user} loggedOut={logOut}/>
 				</Route>
 				<Route exact path="/guest">
-					<DAWLayout guestMode={true}/>
+					<DAWLayout user={null}/>
 				</Route>
 			</Switch>
 		</BrowserRouter>

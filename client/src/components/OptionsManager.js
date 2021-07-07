@@ -55,6 +55,7 @@ const OptionsManager = props => {
 							<label htmlFor="bpm">BPM: {bpm}</label>
 						</Cell>
 						<Cell>
+							{/* Controlled component error */}
 							<input name="bpm" type="range" value={bpm} min="60" max="200" onChange={evt => bpmChanged(evt.target.value)}/>
 						</Cell>
 					</Grid>
@@ -65,6 +66,7 @@ const OptionsManager = props => {
 							<label htmlFor="volume">Volume: {volume}</label>
 						</Cell>
 						<Cell>
+							{/* Controlled component error */}
 							<input name="volume" type="range" value={volume} min="0" max="100" onChange={evt => volChanged(evt.target.value)}/>
 						</Cell>
 					</Grid>
