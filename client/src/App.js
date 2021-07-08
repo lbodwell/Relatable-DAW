@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 
 import {
 	BrowserRouter,
@@ -13,10 +13,6 @@ import "./styles/App.css";
 
 const App = () => {
 	const [user, setUser] = useState(null);
-
-	useEffect(() => {
-		console.log(user);
-	}, [user]);
 
 	const logOut = () => setUser(null);
 

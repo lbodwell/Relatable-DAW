@@ -1,8 +1,8 @@
 import {useCallback, useEffect, useState} from "react";
 import {useHistory} from "react-router-dom";
-import {GoogleLogin, GoogleLogout} from "react-google-login";
 
-const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+import LoginButton from "./LoginButton";
+import LogoutButton from "./LogoutButton";
 
 const HomePage = props => {
 	const {user, loggedIn, loggedOut} = props;
@@ -31,31 +31,6 @@ const HomePage = props => {
 		}
 	}, [user, fetchProjects]);
 
-	const handleLoginSuccess = async googleData => {
-		const res = await fetch("http://localhost:5000/api/auth/google", {
-			method: "POST",
-			credentials: "include",
-			body: JSON.stringify({
-				token: googleData.tokenId
-			}),
-			headers: {
-				"Content-Type": "application/json"
-			}
-		});
-
-		const data = await res.json();
-		if (data) {
-			loggedIn(data);
-		} else {
-			console.error("Failed to login");
-		}
-	};
-
-	const handleLoginFailure = err => {
-		alert("Failed to log in!");
-		console.error(err);
-	};
-
 	const createNewProject = async () => {
 		const res = await fetch("http://localhost:5000/api/projects", {
 			method: "POST",
@@ -78,7 +53,7 @@ const HomePage = props => {
 
 		const data = await res.json();
 		if (data) {
-			setProjects(data)
+			setProjects(data);
 		} else {
 			console.error("Failed to delete project");
 		}
@@ -97,11 +72,7 @@ const HomePage = props => {
 			<h1>Relatable DAW</h1>
 			{user ?
 				<div>
-					<GoogleLogout
-						clientId={CLIENT_ID}
-						buttonText="Logout"
-						onLogoutSuccess={loggedOut}
-					/>
+					<LogoutButton onLogout={loggedOut}/>
 					<h1>Hello {user?.name ?? "{name}"}</h1>
 					<h2>Projects</h2>
 					<button onClick={createNewProject}>New Project</button>
@@ -116,14 +87,7 @@ const HomePage = props => {
 				</div>
 				:
 				<div>
-					<GoogleLogin
-						clientId={CLIENT_ID}
-						buttonText="Log in with Google"
-						onSuccess={handleLoginSuccess}
-						onFailure={handleLoginFailure}
-						isSignedIn={true}
-						cookiePolicy={"single_host_origin"}
-					/>
+					<LoginButton onLogin={loggedIn}/>
 					<button onClick={() => navigateToProject(null)}>Continue as guest</button>
 				</div>
 			}

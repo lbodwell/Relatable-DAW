@@ -37,7 +37,6 @@ const DAWLayout = props => {
 
 		const project = await res.json();
 		if (project) {
-			console.log(project);
 			setProjectName(project.name);
 			setKeyCenter(project.keyCenter);
 			setBpm(project.bpm);

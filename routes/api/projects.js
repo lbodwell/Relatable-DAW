@@ -27,7 +27,6 @@ router.get("/", ensureAuthenticated, async (req, res) => {
 router.get("/:id", ensureAuthenticated, async (req, res) => {
 	const userId = req.user._id;
 	const projectId = req.params.id;
-	console.log(projectId);
 
 	try {
 		const projects = await getProject({_id: projectId, owner: userId});

@@ -43,12 +43,12 @@ const Sidebar = props => {
 	} = props;
 
 	const [parentNotes, setParentNotes] = useState([]);
-	const [currentParent, setCurrentParent] = useState(undefined);
-	const [currentInterval, setCurrentInterval] = useState(undefined);
-	const [currentDirection, setCurrentDirection] = useState(undefined);
-	const [currentDuration, setCurrentDuration] = useState(undefined);
-	const [currentDelay, setCurrentDelay] = useState(undefined);
-	const [name, setName] = useState(projectName);
+	const [currentParent, setCurrentParent] = useState();
+	const [currentInterval, setCurrentInterval] = useState();
+	const [currentDirection, setCurrentDirection] = useState();
+	const [currentDuration, setCurrentDuration] = useState();
+	const [currentDelay, setCurrentDelay] = useState();
+	const [name, setName] = useState("");
 	
 	useEffect(() => {
 		let prevNotes = [];
@@ -64,7 +64,7 @@ const Sidebar = props => {
 	}, [selectedNote]);
 
 	useEffect(() => {
-		setName(projectName);
+		setName(projectName ?? "");
 	}, [projectName]);
 
 	const handleNameChange = evt => {
@@ -144,7 +144,6 @@ const Sidebar = props => {
 		<>
 			<div className="center-text">
 				<label htmlFor="project-name">Project Name: </label>
-				{/* Controlled component error */}
 				<input
 					name="project-name" 
 					type="text" 

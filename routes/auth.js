@@ -1,15 +1,12 @@
 const express = require("express");
-const dotenv = require("dotenv");
 const {OAuth2Client} = require("google-auth-library");
 
 const {getUser, addOrUpdateUser} = require("../controllers/user-controller");
+const {GOOGLE_CLIENT_ID} = require("../config/env-handler");
 
-// TODO: encapsulate env vars in own module to be accessed anywhere
-dotenv.config();
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 
 const router = express.Router();
-const client = new OAuth2Client(CLIENT_ID);
+const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const ensureAuthenticated = async (req, res, next) => {
 	const {userId} = req.session;
@@ -30,7 +27,7 @@ router.post("/google", async (req, res) => {
 	try {
 		const ticket = await client.verifyIdToken({
 			idToken: token,
-			audience: CLIENT_ID
+			audience: GOOGLE_CLIENT_ID
 		});
 
 		const {name, email, picture} = ticket.getPayload();

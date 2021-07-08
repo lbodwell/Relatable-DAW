@@ -4,25 +4,24 @@ const http = require("http");
 const express = require("express");
 const socketio = require("socket.io");
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
 const morgan = require("morgan");
 const cors = require("cors");
 const session = require("express-session");
 const compression = require("compression");
 const methodOverride = require("method-override");
 const helmet = require("helmet");
+
+const {
+	PORT,
+	NODE_ENV,
+	FRONTEND_APP_URL,
+	SESSION_SECRET,
+	MONGO_URI
+} = require("./config/env-handler");
 const apiRouter = require("./routes/api-router");
 
 const app = express();
 const server = http.createServer(app);
-
-// Configure environment variables
-dotenv.config();
-const PORT = process.env.PORT || 5000;
-const NODE_ENV = process.env.NODE_ENV;
-const FRONTEND_APP_URL = process.env.FRONTEND_APP_URL;
-const SESSION_SECRET = process.env.SESSION_SECRET;
-const MONGO_URI = process.env.MONGO_URI;
 
 // Connect to database
 try {
@@ -69,7 +68,7 @@ app.use(methodOverride());
 
 // Routing
 app.use("/api", apiRouter.router);
-app.use(express.static(path.join(__dirname, "client", "build")));
+app.use(express.static(path.join(__dirname, "../", "client", "build")));
 app.use(express.static("public"));
 
 app.get("*", (req, res) => {
