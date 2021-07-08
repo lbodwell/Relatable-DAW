@@ -6,6 +6,7 @@ const {
 	getProject,
 	addProject,
 	updateProject,
+	updateNoteSequence,
 	deleteProject
 } = require("../../controllers/project-controller");
 
@@ -55,10 +56,25 @@ router.post("/", ensureAuthenticated, async (req, res) => {
 router.patch("/:id", ensureAuthenticated, async (req, res) => {
 	const userId = req.user._id;
 	const projectId = req.params.id;
-	const update = {...req.body};
+	const {update} = req.body;
 
 	try {
 		const project = await updateProject(userId, projectId, update);
+
+		res.status(200).json(project);
+	} catch (err) {
+		console.error(err);
+		res.status(500);
+	}
+});
+
+router.patch("/:id/notes", ensureAuthenticated, async (req, res) => {
+	const userId = req.user._id;
+	const projectId = req.params.id;
+	const {newNote} = req.body;
+
+	try {
+		const project = await updateNoteSequence(userId, projectId, newNote);
 
 		res.status(200).json(project);
 	} catch (err) {

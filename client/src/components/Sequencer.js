@@ -8,6 +8,8 @@ import * as Tone from "tone";
 
 import {usePrev} from "../hooks";
 
+import socket from "../socket-connection";
+
 import Row from "./Row";
 
 import "../styles/Sequencer.css";
@@ -24,12 +26,14 @@ const Sequencer = props => {
 		playbackStatus,
 		keyCenter,
 		noteSelected,
+		noteUpdated,
 		noteToDelete,
 		noteDeleted,
 		doAddNote,
 		noteAdded,
 		doClearNotes,
-		notesCleared
+		notesCleared,
+		handleClearNotes
 	} = props;
 	
 	const [synth, setSynth] = useState(null);
@@ -48,6 +52,14 @@ const Sequencer = props => {
 		//console.log("on load");
 		setSynth(new Tone.Synth().toDestination());
 	}, []);
+
+	useEffect(() => {
+		socket.on("notesCleared", () => {
+			setNoteSequence([]);
+			notesCleared(false);
+			noteSelected(null);
+		});
+	}, [noteSelected, notesCleared]);
 
 	useEffect(() => {
 		if (initNoteSequence) {
@@ -146,6 +158,7 @@ const Sequencer = props => {
 
 	// Update note sequence on edit
 	useEffect(() => {
+		// TODO: handle selectedNote separately from updated notes received from socket.io
 		if (prevNote !== selectedNote && selectedNote != null) {
 			let newNoteSequence = [...noteSequence];
 			newNoteSequence[selectedNote.id] = selectedNote;
@@ -171,8 +184,9 @@ const Sequencer = props => {
 			setNoteSequence([...noteSequence, newNote]);
 			noteAdded(false);
 			noteSelected(newNote);
+			noteUpdated(newNote);
 		}
-	}, [noteSequence, selectedNote, doAddNote, noteAdded, noteSelected]);
+	}, [noteSequence, selectedNote, doAddNote, noteAdded, noteSelected, noteUpdated]);
 
 	// Delete a note
 	// TODO: Add id cascading for remaining notes after deletion and fix duplicate component key errors
@@ -211,9 +225,10 @@ const Sequencer = props => {
 		if (doClearNotes) {
 			setNoteSequence([]);
 			notesCleared(false);
+			handleClearNotes();
 			noteSelected(null);
 		}
-	}, [doClearNotes, notesCleared, noteSelected]);
+	}, [doClearNotes, notesCleared, handleClearNotes, noteSelected]);
 
 	return (
 		<ScrollContainer className="piano-roll" hideScrollbars={false}>

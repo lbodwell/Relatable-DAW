@@ -42,13 +42,13 @@ const Sidebar = props => {
 		clearRequested,
 	} = props;
 
+	const [localProjectName, setLocalProjectName] = useState("");
 	const [parentNotes, setParentNotes] = useState([]);
 	const [currentParent, setCurrentParent] = useState();
 	const [currentInterval, setCurrentInterval] = useState();
 	const [currentDirection, setCurrentDirection] = useState();
 	const [currentDuration, setCurrentDuration] = useState();
 	const [currentDelay, setCurrentDelay] = useState();
-	const [name, setName] = useState("");
 	
 	useEffect(() => {
 		let prevNotes = [];
@@ -64,16 +64,18 @@ const Sidebar = props => {
 	}, [selectedNote]);
 
 	useEffect(() => {
-		setName(projectName ?? "");
+		if (projectName) {
+			setLocalProjectName(projectName);
+		}
+		
 	}, [projectName]);
 
 	const handleNameChange = evt => {
-		setName(evt.target.value);
+		setLocalProjectName(evt.target.value);
 	};
 
 	const handleKeyPress = evt => {
 		if (evt.key === "Enter") {
-			projectNameChanged(evt.target.value);
 			evt.target.blur();
 		}
 	};
@@ -147,7 +149,7 @@ const Sidebar = props => {
 				<input
 					name="project-name" 
 					type="text" 
-					value={name} 
+					value={localProjectName} 
 					onChange={handleNameChange} 
 					onBlur={evt => projectNameChanged(evt.target.value)}
 					onKeyPress={handleKeyPress}
@@ -158,10 +160,10 @@ const Sidebar = props => {
 				<h1>Note Editor</h1>
 				<Grid columns={"8rem 8rem"} justifyContent="center">
 					<Cell>
-						<button onClick={addRequested}>Add Note</button>
+						<button onClick={() => addRequested(true)}>Add Note</button>
 					</Cell>
 					<Cell>
-						<button onClick={clearRequested}>Clear Notes</button>
+						<button onClick={() => clearRequested(true)}>Clear Notes</button>
 					</Cell>
 				</Grid>
 				<h2>Selected Note: {selectedNote?.id + 1 || "None"}</h2>

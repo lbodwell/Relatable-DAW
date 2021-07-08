@@ -59,8 +59,7 @@ const DAWLayout = props => {
 	}, [user, projectId, fetchProject, history]);
 
 	useEffect(() => {
-		// Handle web sockets
-		if (user) {
+		if (user && projectId) {
 			socket.emit("join", {username: user.name, projectId});
 
 			socket.on("connection", message => console.log(message));
@@ -69,16 +68,108 @@ const DAWLayout = props => {
 		}
 	}, [user, projectId]);
 
+	// useEffect(() => {
+	// 	if (user && projectId && noteAddRequested) {
+	// 		updateNoteSequence(projectId, note);
+	// 	}
+	// }, [user, projectId, noteAddRequested]);
+
+	const updateProject = async (id, update) => {
+		const res = await fetch(`http://localhost:5000/api/projects/${id}`, {
+			method: "PATCH",
+			credentials: "include",
+			body: JSON.stringify({update}),
+			headers: {
+				"Content-Type": "application/json"
+			}
+		});
+
+		const project = await res.json();
+		if (!project) {
+			console.error("Failed to update project");
+		}
+	};
+
+	const updateNoteSequence = async (id, newNote) => {
+		const res = await fetch(`http://localhost:5000/api/projects/${id}/notes`, {
+			method: "PATCH",
+			credentials: "include",
+			body: JSON.stringify({newNote}),
+			headers: {
+				"Content-Type": "application/json"
+			}
+		});
+
+		const project = await res.json();
+		if (!project) {
+			console.error("Failed to update note sequence");
+		}
+	};
+
 	const handleNoteUpdate = note => {
 		setSelectedNote(note);
 		
-		if (user) {
+		if (user && projectId) {
 			const message = {
 				username: user.name,
 				projectId,
 				newNote: note
 			};
 			socket.emit("noteEdited", message);
+
+			updateNoteSequence(projectId, note);
+		}
+	};
+
+	const handleNoteAdd = note => {
+
+	};
+
+	const handleNoteDelete = note => {
+
+	};
+
+	const clearNoteSequence = () => {
+		if (user && projectId) {
+			const message = {
+				username: user.name,
+				projectId
+			};
+
+			socket.emit("notesCleared", message);
+			updateProject(projectId, {noteSequence: []});
+		}
+	};
+
+	const updateProjectName = newProjectName => {
+		setProjectName(newProjectName);
+
+		if (user && projectId) {
+			updateProject(projectId, {name: newProjectName});
+		}
+	};
+
+	const updateKeyCenter = newKeyCenter => {
+		setKeyCenter(newKeyCenter);
+
+		if (user && projectId) {
+			updateProject(projectId, {keyCenter: newKeyCenter});
+		}
+	};
+
+	const updateBpm = newBpm => {
+		setBpm(newBpm);
+
+		if (user && projectId) {
+			updateProject(projectId, {bpm: newBpm});
+		}
+	};
+
+	const updateVolume = newVolume => {
+		setVolume(newVolume);
+		
+		if (user && projectId) {
+			updateProject(projectId, {volume: newVolume});
 		}
 	};
 
@@ -108,7 +199,7 @@ const DAWLayout = props => {
 				<Cell width={1}>
 					<Sidebar
 						projectName={projectName}
-						projectNameChanged={setProjectName}
+						projectNameChanged={updateProjectName}
 						selectedNote={selectedNote}
 						noteUpdated={handleNoteUpdate}
 						deleteRequested={setNoteToDelete}
@@ -121,11 +212,11 @@ const DAWLayout = props => {
 						<Cell>
 							<OptionsManager
 								keyCenter={keyCenter}
-								keyChanged={setKeyCenter}
+								keyChanged={updateKeyCenter}
 								bpm={bpm}
-								bpmChanged={setBpm}
+								bpmChanged={updateBpm}
 								volume={volume}
-								volChanged={setVolume}
+								volChanged={updateVolume}
 								updatePlayback={updatePlayback}
 								playbackButtonText={getPlaybackButtonText()}
 							/>
@@ -139,12 +230,14 @@ const DAWLayout = props => {
 								bpm={bpm}
 								volume={volume}
 								noteSelected={setSelectedNote}
+								noteUpdated={handleNoteUpdate}
 								noteToDelete={noteToDelete}
 								noteDeleted={setNoteToDelete}
 								doAddNote={noteAddRequested}
 								noteAdded={setNoteAddRequested}
 								doClearNotes={clearNotesRequested}
 								notesCleared={setClearNotesRequested}
+								handleClearNotes={clearNoteSequence}
 							/>
 						</Cell>
 					</Grid>

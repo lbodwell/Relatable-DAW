@@ -58,8 +58,8 @@ app.use(session({
 	saveUninitialized: false,
 	// ! This is needed to prevent cookie issues but causes API routes to fail
 	// cookie: {
-	// 	sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-	// 	secure: process.env.NODE_ENV === "production"
+	// 	sameSite: NODE_ENV === "production" ? "none" : "lax",
+	// 	secure: NODE_ENV === "production"
 	// }
 }));
 app.use(compression());
@@ -68,7 +68,7 @@ app.use(methodOverride());
 
 // Routing
 app.use("/api", apiRouter.router);
-app.use(express.static(path.join(__dirname, "../", "client", "build")));
+app.use(express.static(path.join(__dirname, "client", "build")));
 app.use(express.static("public"));
 
 app.get("*", (req, res) => {
@@ -102,6 +102,13 @@ io.on("connection", socket => {
 			console.log(`${username} has edited a note in project id: ${projectId}.`);
 		}
 		socket.to(projectId).emit("noteEdited", {username, newNote});
+	});
+
+	socket.on("notesCleared", ({username, projectId}) => {
+		if (NODE_ENV === "development") {
+			console.log(`${username} has cleared the notes in project id: ${projectId}.`);
+		}
+		socket.to(projectId).emit("notesCleared", {username});
 	});
 });
 
