@@ -21,6 +21,8 @@ const minSequencerLength = 4 * 8 * 4;
 
 const Sequencer = props => {
 	const {
+		user,
+		projectId,
 		initNoteSequence,
 		selectedNote,
 		playbackStatus,
@@ -33,6 +35,7 @@ const Sequencer = props => {
 		noteAdded,
 		doClearNotes,
 		notesCleared,
+		handleDeleteNotes,
 		handleClearNotes
 	} = props;
 	
@@ -47,6 +50,33 @@ const Sequencer = props => {
 
 	const handleNoteClick = useCallback(noteId => noteSelected(noteSequence[noteId]), [noteSelected, noteSequence]);
 
+	// Delete a note and all its descendants from the note sequence
+	const deleteNote = useCallback(targetNoteId => {
+		let targets = [targetNoteId];
+		noteSequence.forEach(note => {
+			if (targets.every(target => target.id !== note.id)) {
+				targets.forEach(target => {
+					if (note.relation.parent === target) {
+						targets.push(note.id);
+					}
+				});
+			}
+		});
+
+		if (targets.length > 0) {
+			console.log(`This will delete ${targets.length - 1} descendant notes`);
+			// TODO: look into awaiting confirmation dialog
+		}
+
+		const newNoteSequence = [...noteSequence].filter(note => !targets.includes(note.id));
+		setNoteSequence(newNoteSequence);
+
+		noteDeleted(null);
+		noteSelected(null);
+
+		return newNoteSequence;
+	}, [noteSequence, noteDeleted, noteSelected]);
+
 	// Initial setup
 	useEffect(() => {
 		//console.log("on load");
@@ -54,12 +84,18 @@ const Sequencer = props => {
 	}, []);
 
 	useEffect(() => {
-		socket.on("notesCleared", () => {
-			setNoteSequence([]);
-			notesCleared(false);
-			noteSelected(null);
-		});
-	}, [noteSelected, notesCleared]);
+		if (user && projectId) {
+			socket.on("noteDeleted", ({deletedNote}) => {
+				deleteNote(deletedNote.id);
+			});
+	
+			socket.on("notesCleared", () => {
+				setNoteSequence([]);
+				notesCleared(false);
+				noteSelected(null);
+			});
+		}
+	}, [user, projectId, deleteNote, noteSelected, notesCleared]);
 
 	useEffect(() => {
 		if (initNoteSequence) {
@@ -143,7 +179,7 @@ const Sequencer = props => {
 		if (playbackStatus === "Playing") {
 			let test = [];
 			noteSequence.forEach(note => {
-				test.push({pitch: pitches[note.id], duration: durationMappings[note.duration]})
+				test.push({pitch: pitches[note.id], duration: durationMappings[note.duration]});
 			});
 			console.log(test);
 			const part = new Tone.Part((time, note) => {
@@ -188,37 +224,21 @@ const Sequencer = props => {
 		}
 	}, [noteSequence, selectedNote, doAddNote, noteAdded, noteSelected, noteUpdated]);
 
-	// Delete a note
+	// Detect user-initiated note deletion
 	// TODO: Add id cascading for remaining notes after deletion and fix duplicate component key errors
 	useEffect(() => {
 		const targetNoteId = noteToDelete?.id;
 
 		if (!targetNoteId) {
 			return;
-		}  
-
-		let targets = [targetNoteId];
-		noteSequence.forEach(note => {
-			if (targets.every(target => target.id !== note.id)) {
-				targets.forEach(target => {
-					if (note.relation.parent === target) {
-						targets.push(note.id);
-					}
-				});
-			}
-		});
-
-		if (targets.length > 0) {
-			console.log(`This will delete ${targets.length - 1} descendant notes`);
-			// TODO: look into awaiting confirmation dialog
 		}
 
-		const newNoteSequence = [...noteSequence].filter(note => !targets.includes(note.id));
-		setNoteSequence(newNoteSequence);
+		const newSequence = deleteNote(targetNoteId);
+		if (user && projectId) {
+			handleDeleteNotes(noteToDelete, newSequence);
+		} 
 
-		noteDeleted(null);
-		noteSelected(null);
-	}, [noteSequence, noteToDelete, noteDeleted, noteSelected]);
+	}, [user, projectId, noteToDelete, deleteNote, handleDeleteNotes]);
 
 	// Clear all notes
 	useEffect(() => {

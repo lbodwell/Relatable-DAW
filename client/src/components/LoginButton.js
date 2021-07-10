@@ -5,6 +5,7 @@ import GoogleLogin from "react-google-login";
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const handleLoginSuccess = async (googleData, onLogin) => {
+	window.localStorage.setItem("tokenId", googleData.tokenId);
 	const res = await fetch("http://localhost:5000/api/auth/google", {
 		method: "POST",
 		credentials: "include",
@@ -20,7 +21,7 @@ const handleLoginSuccess = async (googleData, onLogin) => {
 	if (data) {
 		onLogin(data);
 	} else {
-		console.error("Failed to login");
+		console.error("Failed to log in");
 	}
 };
 
@@ -29,9 +30,7 @@ const handleLoginFailure = err => {
 	console.error(err);
 };
 
-const LoginButton = props => {
-	const {onLogin} = props;
-
+const LoginButton = ({onLogin}) => {
 	return (
 		<GoogleLogin
 			clientId={CLIENT_ID}

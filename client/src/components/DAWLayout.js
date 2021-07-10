@@ -8,11 +8,12 @@ import * as Tone from "tone";
 import Sequencer from "./Sequencer";
 import Sidebar from "./Sidebar";
 import OptionsManager from "./OptionsManager";
+import {handleLoginSuccess} from "./LoginButton";
 
 import socket from "../socket-connection";
 
 const DAWLayout = props => {
-	const {user, loggedOut} = props;
+	const {user, loggedIn, loggedOut} = props;
 
 	const [projectName, setProjectName] = useState();
 	const [initNoteSequence, setInitNoteSequence] = useState();
@@ -52,11 +53,16 @@ const DAWLayout = props => {
 			if (user) {
 				fetchProject(projectId);
 			} else {
-				history.push("/");
+				const tokenId = window.localStorage.getItem("tokenId");
+				if (tokenId) {
+					handleLoginSuccess({tokenId}, loggedIn);
+				} else {
+					history.push("/");
+				}
 			}
 		}
 		
-	}, [user, projectId, fetchProject, history]);
+	}, [user, projectId, fetchProject, loggedIn, history]);
 
 	useEffect(() => {
 		if (user && projectId) {
@@ -66,13 +72,7 @@ const DAWLayout = props => {
 
 			socket.on("noteEdited", ({newNote}) => setSelectedNote(newNote));
 		}
-	}, [user, projectId]);
-
-	// useEffect(() => {
-	// 	if (user && projectId && noteAddRequested) {
-	// 		updateNoteSequence(projectId, note);
-	// 	}
-	// }, [user, projectId, noteAddRequested]);
+	}, [user, projectId]); 
 
 	const updateProject = async (id, update) => {
 		const res = await fetch(`http://localhost:5000/api/projects/${id}`, {
@@ -121,14 +121,6 @@ const DAWLayout = props => {
 		}
 	};
 
-	const handleNoteAdd = note => {
-
-	};
-
-	const handleNoteDelete = note => {
-
-	};
-
 	const clearNoteSequence = () => {
 		if (user && projectId) {
 			const message = {
@@ -138,6 +130,20 @@ const DAWLayout = props => {
 
 			socket.emit("notesCleared", message);
 			updateProject(projectId, {noteSequence: []});
+		}
+	};
+
+	const deleteNote = (note, newSequence) => {
+		if (user && projectId) {
+			const message = {
+				username: user.name,
+				projectId,
+				deletedNote: note
+			}
+
+			socket.emit("noteDeleted", message);
+			console.log(newSequence);
+			updateProject(projectId, {noteSequence: newSequence});
 		}
 	};
 
@@ -223,6 +229,8 @@ const DAWLayout = props => {
 						</Cell>
 						<Cell>
 							<Sequencer
+								user={user}
+								projectId={projectId}
 								initNoteSequence={initNoteSequence}
 								selectedNote={selectedNote}
 								playbackStatus={playbackStatus}
@@ -237,6 +245,7 @@ const DAWLayout = props => {
 								noteAdded={setNoteAddRequested}
 								doClearNotes={clearNotesRequested}
 								notesCleared={setClearNotesRequested}
+								handleDeleteNotes={deleteNote}
 								handleClearNotes={clearNoteSequence}
 							/>
 						</Cell>

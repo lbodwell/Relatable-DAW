@@ -14,16 +14,14 @@ import "./styles/App.css";
 const App = () => {
 	const [user, setUser] = useState(null);
 
-	const logOut = () => setUser(null);
-
 	return (
 		<BrowserRouter>
 			<Switch>
 				<Route exact path="/">
-					<HomePage user={user} loggedIn={setUser} loggedOut={logOut}/>
+					<HomePage user={user} loggedIn={setUser} loggedOut={() => setUser(null)}/>
 				</Route>
 				<Route exact path="/project/:projectId">
-					<DAWLayout user={user} loggedOut={logOut}/>
+					<DAWLayout user={user} loggedIn={setUser} loggedOut={() => setUser(null)}/>
 				</Route>
 				<Route exact path="/guest">
 					<DAWLayout user={null}/>

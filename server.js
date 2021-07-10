@@ -104,6 +104,13 @@ io.on("connection", socket => {
 		socket.to(projectId).emit("noteEdited", {username, newNote});
 	});
 
+	socket.on("noteDeleted", ({username, projectId, deletedNote}) => {
+		if (NODE_ENV === "development") {
+			console.log(`${username} has deleted a note in project id: ${projectId}.`);
+		}
+		socket.to(projectId).emit("noteDeleted", {username, deletedNote});
+	});
+
 	socket.on("notesCleared", ({username, projectId}) => {
 		if (NODE_ENV === "development") {
 			console.log(`${username} has cleared the notes in project id: ${projectId}.`);
