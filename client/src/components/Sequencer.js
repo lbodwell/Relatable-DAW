@@ -164,7 +164,7 @@ const Sequencer = props => {
 		});
 		
 		for (let i = 0; i < numRows; i++) {
-			newRows.push({rowId: i, notePositions: positionsMap[i]});
+			newRows.push({rowId: i, notePositions: positionsMap[i] ?? []});
 		}
 
 		setRows(newRows);
@@ -194,6 +194,7 @@ const Sequencer = props => {
 
 	// Update note sequence on edit
 	useEffect(() => {
+		
 		// TODO: handle selectedNote separately from updated notes received from socket.io
 		if (prevNote !== selectedNote && selectedNote != null) {
 			let newNoteSequence = [...noteSequence];

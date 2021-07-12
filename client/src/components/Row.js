@@ -64,6 +64,7 @@ const Row = props => {
 		}
 
 		setPixels(newPixels);
+		//console.log(newPixels);
 	}, [rowId, width, keyCenter, notePositions, noteClicked, backgroundColor, offset]);
 
 	return (

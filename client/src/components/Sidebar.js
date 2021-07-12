@@ -33,6 +33,8 @@ const durationMappings = {
 
 const Sidebar = props => {
 	const {
+		user,
+		projectId,
 		projectName,
 		projectNameChanged,
 		selectedNote,
@@ -144,18 +146,19 @@ const Sidebar = props => {
 
 	return (
 		<>
-			<div className="center-text">
-				<label htmlFor="project-name">Project Name: </label>
-				<input
-					name="project-name" 
-					type="text" 
-					value={localProjectName} 
-					onChange={handleNameChange} 
-					onBlur={evt => projectNameChanged(evt.target.value)}
-					onKeyPress={handleKeyPress}
-				/>
-			</div>
-			
+			{(user && projectId) &&
+				<div className="center-text">
+					<label htmlFor="project-name">Project Name: </label>
+					<input
+						name="project-name" 
+						type="text" 
+						value={localProjectName} 
+						onChange={handleNameChange} 
+						onBlur={evt => projectNameChanged(evt.target.value)}
+						onKeyPress={handleKeyPress}
+					/>
+				</div>
+			}
 			<div className="note-editor">
 				<h1>Note Editor</h1>
 				<Grid columns={"8rem 8rem"} justifyContent="center">
