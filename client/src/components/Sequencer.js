@@ -47,6 +47,7 @@ const Sequencer = props => {
 	const [positions, setPositions] = useState([]);
 	const [rows, setRows] = useState([]);
 	const [sequencerLength, setSequencerLength] = useState(minSequencerLength);
+	const [partStarted, setPartStarted] = useState(false);
 
 	const prevNote = usePrev(selectedNote);
 
@@ -175,44 +176,60 @@ const Sequencer = props => {
 
 	// Audio playback
 	useEffect(() => {
-		const durationMappings = {
-			0.25: "16n",
-			0.5: "8n",
-			0.75: "8n.",
-			1: "4n",
-			1.5: "4n.",
-			2: "2n",
-			3: "2n.",
-			4: "1m"
-		};
-
-		let partSequence = [];
-
-		noteSequence.forEach(note => {
-			const start = positions[note.id]?.horizontalPos / 4;
-			const time = `${Math.floor(start / 4)}:${start % 4}`;
-			partSequence.push([time, {pitch: pitches[note.id], duration: durationMappings[note.duration]}]);
-		});
-		
-		// TODO: use Tone.now() to schedule relative to current time (fix start time must be greater than prev start time error)
-		const part = new Tone.Part((time, note) => {
-			synth.triggerAttackRelease(note.pitch, note.duration, time);
-		}, partSequence);
-		
 		if (playbackStatus === "Playing") {
+			if (!partStarted) {
+				const durationMappings = {
+					0.25: "16n",
+					0.5: "8n",
+					0.75: "8n.",
+					1: "4n",
+					1.5: "4n.",
+					2: "2n",
+					3: "2n.",
+					4: "1m"
+				};
+		
+				let partSequence = [];
+				let end;
+
+				noteSequence.forEach(note => {
+					const start = positions[note.id]?.horizontalPos / 4;
+					const time = `${Math.floor(start / 4)}:${start % 4}`;
+					const duration = durationMappings[note.duration];
+
+					if (note.id === noteSequence.length - 1) {
+						// TODO: Clean up by parsing BBS from start and note.duration instead of converting to seconds and back
+						const timeInSeconds = Tone.Time(time).toSeconds();
+						const durationInSeconds = Tone.Time(duration).toSeconds();
+						end = Tone.Time(timeInSeconds + durationInSeconds).toBarsBeatsSixteenths();
+					}
+					partSequence.push([time, {pitch: pitches[note.id], duration}]);
+				});
+				
+				const part = new Tone.Part((time, note) => {
+					synth.triggerAttackRelease(note.pitch, note.duration, time);
+				}, partSequence);
+				
+				part.loopStart = 0;
+				part.loopEnd = end;
+				part.loop = true;
+				part.start();
+				setPartStarted(true);
+			}
+
 			Tone.Transport.bpm.value = bpm;
-			part.start();
 			Tone.Transport.start();
 		} else if (playbackStatus === "Paused") {
-			part.stop();
+			Tone.Transport.pause();
+		} else if (playbackStatus === "Stopped") {
 			Tone.Transport.stop();
 		}
 		
-	}, [noteSequence, pitches, playbackStatus, synth, positions, bpm]);
+	}, [noteSequence, pitches, playbackStatus, synth, positions, bpm, partStarted]);
 
 	// Update note sequence on edit
 	useEffect(() => {
-		// TODO: handle selectedNote separately from updated notes received from socket.io
+		// TODO: Handle selectedNote separately from updated notes received from socket.io
 		if (prevNote !== selectedNote && selectedNote != null) {
 			let newNoteSequence = [...noteSequence];
 			newNoteSequence[selectedNote.id] = selectedNote;

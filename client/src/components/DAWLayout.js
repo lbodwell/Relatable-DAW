@@ -180,12 +180,16 @@ const DAWLayout = props => {
 	};
 
 	const updatePlayback = async () => {
-		if (playbackStatus === "Paused") {
+		if (playbackStatus === "Paused" || playbackStatus === "Stopped") {
 			await Tone.start();
 			setPlaybackStatus("Playing");
 		} else if (playbackStatus === "Playing") {
 			setPlaybackStatus("Paused");
 		}
+	};
+
+	const stopPlayback = () => {
+		setPlaybackStatus("Stopped");
 	};
 
 	const getPlaybackButtonText = () => {
@@ -226,6 +230,7 @@ const DAWLayout = props => {
 								volume={volume}
 								volChanged={updateVolume}
 								updatePlayback={updatePlayback}
+								stopPlayback={stopPlayback}
 								playbackButtonText={getPlaybackButtonText()}
 							/>
 						</Cell>

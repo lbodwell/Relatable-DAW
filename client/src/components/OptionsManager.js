@@ -28,6 +28,7 @@ const OptionsManager = props => {
 		volume,
 		volChanged,
 		updatePlayback,
+		stopPlayback,
 		playbackButtonText
 	} = props;
 	
@@ -63,7 +64,7 @@ const OptionsManager = props => {
 							<button onClick={updatePlayback}>{playbackButtonText}</button>
 						</Cell>
 						<Cell>
-							<button onClick={updatePlayback}>Stop</button>
+							<button onClick={stopPlayback}>Stop</button>
 						</Cell>
 					</Grid>
 				</Cell>
