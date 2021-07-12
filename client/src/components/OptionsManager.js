@@ -31,15 +31,8 @@ const OptionsManager = props => {
 		playbackButtonText
 	} = props;
 	
-	const [localKeyCenter, setLocalKeyCenter] = useState("C");
 	const [localBpm, setLocalBPM] = useState(120);
 	const [localVolume, setLocalVolume] = useState(100);
-
-	useEffect(() => {
-		if (keyCenter) {
-			setLocalKeyCenter(keyCenter);
-		}
-	}, [keyCenter]);
 
 	useEffect(() => {
 		if (bpm) {
@@ -53,14 +46,6 @@ const OptionsManager = props => {
 		}
 	}, [volume]);
 
-	useEffect(() => {
-		keyChanged(localKeyCenter);
-	}, [localKeyCenter, keyChanged]);
-
-	const handleKeyChange = evt => {
-		setLocalKeyCenter(evt.target.value);
-	};
-
 	const handleBpmChange = evt => {
 		setLocalBPM(evt.target.value)
 	};
@@ -71,9 +56,16 @@ const OptionsManager = props => {
 
 	return (
 		<div className="options">
-			<Grid columns={"0.25rem 5rem 10rem 12rem"} gap="6rem">
+			<Grid columns={"2.5rem 5rem 10rem 12rem"} gap="6rem">
 				<Cell>
-					<button onClick={updatePlayback}>{playbackButtonText}</button>
+					<Grid columns={"2.5rem 2.5rem"} gap="1rem">
+						<Cell>
+							<button onClick={updatePlayback}>{playbackButtonText}</button>
+						</Cell>
+						<Cell>
+							<button onClick={updatePlayback}>Stop</button>
+						</Cell>
+					</Grid>
 				</Cell>
 				<Cell>
 					<Grid columns={2}>
@@ -83,8 +75,8 @@ const OptionsManager = props => {
 						<Cell>
 							<select
 								name="keyCenter"
-								value={localKeyCenter}
-								onChange={handleKeyChange}
+								value={keyCenter}
+								onChange={evt => keyChanged(evt.target.value)}
 							>
 								{keys.map((key, index) => (
 									<option key={index} value={key}>{`${key} Major`}</option>

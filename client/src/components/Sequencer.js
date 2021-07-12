@@ -3,7 +3,7 @@ import {useCallback, useEffect, useState} from "react";
 import ScrollContainer from "react-indiana-drag-scroll";
 
 import {transpose} from "@tonaljs/core";
-import {Interval} from "@tonaljs/tonal";
+import {Note, Interval} from "@tonaljs/tonal";
 import * as Tone from "tone";
 
 import {usePrev} from "../hooks";
@@ -14,8 +14,8 @@ import Row from "./Row";
 
 import "../styles/Sequencer.css";
 
-// 12 notes in one octave times 5 full octaves (C3-C6) plus 1 for C7, all times 2 rows per note
-const numRows = (12 * 4 + 1) * 2;
+// 12 notes in one octave times 3 full octaves (C3-C5) plus 1 for C6, all times 2 rows per note
+const numRows = (12 * 3 + 1) * 2;
 // 4 beats per measure times 8 measures times 4 "pixels" per beat
 const minSequencerLength = 4 * 8 * 4;
 
@@ -27,6 +27,8 @@ const Sequencer = props => {
 		selectedNote,
 		playbackStatus,
 		keyCenter,
+		bpm,
+		volume,
 		noteSelected,
 		noteUpdated,
 		noteToDelete,
@@ -112,11 +114,12 @@ const Sequencer = props => {
 			const {relation} = note;
 
 			if (relation.parent === -1) {
-				pitch = transpose(keyCenter + "5", relation.interval);
+				pitch = transpose(keyCenter + "4", relation.interval);
 			} else {
 				const parentPitch = newPitches[relation.parent];
 				if (parentPitch) {
-					pitch = transpose(newPitches[relation.parent], relation.interval);
+					
+					pitch = Note.simplify(transpose(newPitches[relation.parent], relation.interval));
 				} else {
 					console.error("Parent pitch undefined");
 				}
@@ -137,7 +140,7 @@ const Sequencer = props => {
 			noteSequence.forEach(note => {
 				numBeats += note.delay;
 				const horizontalPos = 4 * numBeats;
-				const verticalPos = -2 * Interval.semitones(Interval.distance("C7", pitches[note.id]));
+				const verticalPos = -2 * Interval.semitones(Interval.distance("C6", pitches[note.id]));
 				newPositions[note.id] = {horizontalPos, verticalPos};
 				numBeats += note.duration;
 			});
@@ -172,29 +175,43 @@ const Sequencer = props => {
 
 	// Audio playback
 	useEffect(() => {
-		const durationMappings = {0.25: "1n", 0.5: "2n", 1: "4n", 2: "8n", 4: "1m"};
-		// ? Firing twice for some reason
-		//console.log(playbackStatus);
-		Tone.Transport.pause();
+		const durationMappings = {
+			0.25: "16n",
+			0.5: "8n",
+			0.75: "8n.",
+			1: "4n",
+			1.5: "4n.",
+			2: "2n",
+			3: "2n.",
+			4: "1m"
+		};
+
+		let partSequence = [];
+
+		noteSequence.forEach(note => {
+			const start = positions[note.id]?.horizontalPos / 4;
+			const time = `${Math.floor(start / 4)}:${start % 4}`;
+			partSequence.push([time, {pitch: pitches[note.id], duration: durationMappings[note.duration]}]);
+		});
+		
+		// TODO: use Tone.now() to schedule relative to current time (fix start time must be greater than prev start time error)
+		const part = new Tone.Part((time, note) => {
+			synth.triggerAttackRelease(note.pitch, note.duration, time);
+		}, partSequence);
+		
 		if (playbackStatus === "Playing") {
-			let test = [];
-			noteSequence.forEach(note => {
-				test.push({pitch: pitches[note.id], duration: durationMappings[note.duration]});
-			});
-			console.log(test);
-			const part = new Tone.Part((time, note) => {
-				synth.triggerAttackRelease(note.pitch, note.duration, time);
-			}, test);
+			Tone.Transport.bpm.value = bpm;
+			part.start();
 			Tone.Transport.start();
-			
-			//part.start();
+		} else if (playbackStatus === "Paused") {
+			part.stop();
+			Tone.Transport.stop();
 		}
 		
-	}, [noteSequence, pitches, playbackStatus, synth]);
+	}, [noteSequence, pitches, playbackStatus, synth, positions, bpm]);
 
 	// Update note sequence on edit
 	useEffect(() => {
-		
 		// TODO: handle selectedNote separately from updated notes received from socket.io
 		if (prevNote !== selectedNote && selectedNote != null) {
 			let newNoteSequence = [...noteSequence];

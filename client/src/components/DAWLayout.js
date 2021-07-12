@@ -17,7 +17,7 @@ const DAWLayout = props => {
 
 	const [projectName, setProjectName] = useState();
 	const [initNoteSequence, setInitNoteSequence] = useState();
-	const [keyCenter, setKeyCenter] = useState();
+	const [keyCenter, setKeyCenter] = useState("C");
 	const [bpm, setBpm] = useState();
 	const [volume, setVolume] = useState();
 	const [selectedNote, setSelectedNote] = useState(null);
@@ -204,6 +204,8 @@ const DAWLayout = props => {
 			<Grid columns={4} gap="1rem">
 				<Cell width={1}>
 					<Sidebar
+						user={user}
+						projectId={projectId}
 						projectName={projectName}
 						projectNameChanged={updateProjectName}
 						selectedNote={selectedNote}
