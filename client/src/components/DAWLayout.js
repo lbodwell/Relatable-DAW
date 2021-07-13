@@ -2,6 +2,11 @@ import {useCallback, useEffect, useState} from "react";
 import {useHistory, useParams} from "react-router-dom";
 
 import {Cell, Grid} from "styled-css-grid";
+import {
+	AppBar,
+	Toolbar,
+	Typography
+} from "@material-ui/core";
 
 import * as Tone from "tone";
 
@@ -11,6 +16,8 @@ import OptionsManager from "./OptionsManager";
 import {handleLoginSuccess} from "./LoginButton";
 
 import socket from "../socket-connection";
+
+import "../styles/DAWLayout.css";
 
 const DAWLayout = props => {
 	const {user, loggedIn, loggedOut} = props;
@@ -25,6 +32,7 @@ const DAWLayout = props => {
 	const [noteAddRequested, setNoteAddRequested] = useState(false);
 	const [clearNotesRequested, setClearNotesRequested] = useState(false);
 	const [playbackStatus, setPlaybackStatus] = useState("Paused");
+	const [collaborators, setCollaborators] = useState([]);
 
 	const history = useHistory();
 
@@ -42,9 +50,25 @@ const DAWLayout = props => {
 			setKeyCenter(project.keyCenter);
 			setBpm(project.bpm);
 			setVolume(project.volume);
+			setCollaborators([...project.editors, ...project.viewers]);
 			setInitNoteSequence(project.noteSequence);
 		} else {
 			console.error("Failed to access project");
+		}
+	}, []);
+
+	const fetchCollaborators = useCallback(async id => {
+		const res = await fetch(`http://localhost:5000/api/projects/${id}/collaborators`, {
+			method: "GET",
+			credentials: "include"
+		});
+
+		const collaborators = await res.json();
+		console.log(collaborators);
+		if (collaborators) {
+			setCollaborators(collaborators);
+		} else {
+			console.error("Failed to get collaborators");
 		}
 	}, []);
 
@@ -52,6 +76,7 @@ const DAWLayout = props => {
 		if (projectId) {
 			if (user) {
 				fetchProject(projectId);
+				fetchCollaborators(projectId);
 			} else {
 				const tokenId = window.localStorage.getItem("tokenId");
 				if (tokenId) {
@@ -62,7 +87,7 @@ const DAWLayout = props => {
 			}
 		}
 		
-	}, [user, projectId, fetchProject, loggedIn, history]);
+	}, [user, projectId, fetchProject, fetchCollaborators, loggedIn, history]);
 
 	useEffect(() => {
 		if (user && projectId) {
@@ -192,19 +217,13 @@ const DAWLayout = props => {
 		setPlaybackStatus("Stopped");
 	};
 
-	const getPlaybackButtonText = () => {
-		let text = "Play";
-
-		if (playbackStatus === "Playing") {
-			text = "Pause";
-		}
-
-		return text;
-	};
-
 	return (
 		<>
-			<h1 className="center-text">Relatable DAW</h1>
+			<AppBar className="app-bar" position="static">
+				<Toolbar>
+					<Typography variant="h5">Relatable DAW</Typography>
+				</Toolbar>
+			</AppBar>
 			<Grid columns={4} gap="1rem">
 				<Cell width={1}>
 					<Sidebar
@@ -231,7 +250,9 @@ const DAWLayout = props => {
 								volChanged={updateVolume}
 								updatePlayback={updatePlayback}
 								stopPlayback={stopPlayback}
-								playbackButtonText={getPlaybackButtonText()}
+								playbackStatus={playbackStatus}
+								collaborators={collaborators}
+								collaboratorsChanged={setCollaborators}
 							/>
 						</Cell>
 						<Cell>

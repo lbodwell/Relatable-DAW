@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useState, useRef} from "react";
 
 import ScrollContainer from "react-indiana-drag-scroll";
 
@@ -47,7 +47,8 @@ const Sequencer = props => {
 	const [positions, setPositions] = useState([]);
 	const [rows, setRows] = useState([]);
 	const [sequencerLength, setSequencerLength] = useState(minSequencerLength);
-	const [partStarted, setPartStarted] = useState(false);
+
+	const part = useRef(null);
 
 	const prevNote = usePrev(selectedNote);
 
@@ -82,10 +83,10 @@ const Sequencer = props => {
 
 	// Initial setup
 	useEffect(() => {
-		//console.log("on load");
 		setSynth(new Tone.Synth().toDestination());
 	}, []);
 
+	// Delete and clear notes on socket emissions
 	useEffect(() => {
 		if (user && projectId) {
 			socket.on("noteDeleted", ({deletedNote}) => {
@@ -177,7 +178,7 @@ const Sequencer = props => {
 	// Audio playback
 	useEffect(() => {
 		if (playbackStatus === "Playing") {
-			if (!partStarted) {
+			if (!part.current) {
 				const durationMappings = {
 					0.25: "16n",
 					0.5: "8n",
@@ -206,15 +207,15 @@ const Sequencer = props => {
 					partSequence.push([time, {pitch: pitches[note.id], duration}]);
 				});
 				
-				const part = new Tone.Part((time, note) => {
+				const newPart = new Tone.Part((time, note) => {
 					synth.triggerAttackRelease(note.pitch, note.duration, time);
 				}, partSequence);
 				
-				part.loopStart = 0;
-				part.loopEnd = end;
-				part.loop = true;
-				part.start();
-				setPartStarted(true);
+				newPart.loopStart = 0;
+				newPart.loopEnd = end;
+				newPart.loop = true;
+				newPart.start();
+				part.current = newPart;
 			}
 
 			Tone.Transport.bpm.value = bpm;
@@ -224,8 +225,7 @@ const Sequencer = props => {
 		} else if (playbackStatus === "Stopped") {
 			Tone.Transport.stop();
 		}
-		
-	}, [noteSequence, pitches, playbackStatus, synth, positions, bpm, partStarted]);
+	}, [noteSequence, pitches, playbackStatus, synth, positions, bpm]);
 
 	// Update note sequence on edit
 	useEffect(() => {
@@ -258,6 +258,16 @@ const Sequencer = props => {
 			noteUpdated(newNote);
 		}
 	}, [noteSequence, selectedNote, doAddNote, noteAdded, noteSelected, noteUpdated]);
+
+	// Update part on note sequence change
+	useEffect(() => {
+		if (noteSequence && part.current) {
+			Tone.Transport.pause();
+			part.current.stop();
+			part.current.dispose();
+			part.current = null;
+		}
+	}, [noteSequence]);
 
 	// Detect user-initiated note deletion
 	// TODO: Add id cascading for remaining notes after deletion and fix duplicate component key errors

@@ -8,6 +8,14 @@ const getUser = async filter => {
 	}
 };
 
+const getUsersByIds = async userIds => {
+	try {
+		return await User.find({_id: {$in: userIds}});
+	} catch (err) {
+		console.error(err);
+	}
+};
+
 const addOrUpdateUser = async (filter, update) => {
 	try {
 		return await User.findOneAndUpdate(filter, update, {
@@ -27,4 +35,4 @@ const deleteUser = async filter => {
 	}
 };
 
-module.exports = {getUser, addOrUpdateUser, deleteUser};
+module.exports = {getUser, getUsersByIds, addOrUpdateUser, deleteUser};

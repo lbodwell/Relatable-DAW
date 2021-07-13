@@ -7,6 +7,23 @@
 	cursor: pointer;
 }
 
+@keyframes selected-breathe {
+	0% {
+		filter: brightness(1);
+		-webkit-filter: brightness(1);
+	}
+	50% {
+		filter: brightness(0.5);
+		-webkit-filter: brightness(0.5);
+	}
+	100% {
+		filter: brightness(1);
+		-webkit-filter: brightness(1);
+	}
+}
+
 .selected {
-	filter: brightness(50%);
+	animation-name: selected-breathe;
+	animation-duration: 2s;
+	animation-iteration-count: infinite;
 }

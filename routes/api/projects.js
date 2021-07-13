@@ -4,6 +4,7 @@ const {ensureAuthenticated} = require("../auth");
 const {
 	getProjects,
 	getProject,
+	getCollaborators,
 	addProject,
 	updateProject,
 	updateNoteSequence,
@@ -14,9 +15,16 @@ const router = express.Router();
 
 router.get("/", ensureAuthenticated, async (req, res) => {
 	const userId = req.user._id;
+	const filter = {
+		$or: [
+			{owner: userId},
+			{editors: userId},
+			{viewers: userId}
+		]
+	};
 
 	try {
-		const projects = await getProjects({owner: userId});
+		const projects = await getProjects(filter);
 
 		res.status(200).json(projects);
 	} catch (err) {
@@ -28,9 +36,21 @@ router.get("/", ensureAuthenticated, async (req, res) => {
 router.get("/:id", ensureAuthenticated, async (req, res) => {
 	const userId = req.user._id;
 	const projectId = req.params.id;
+	const filter = {
+		$and: [
+			{_id: projectId}, 
+			{
+				$or: [
+					{owner: userId},
+					{editors: userId},
+					{viewers: userId}
+				]
+			}
+		]
+	};
 
 	try {
-		const projects = await getProject({_id: projectId, owner: userId});
+		const projects = await getProject(filter);
 
 		res.status(200).json(projects);
 	} catch (err) {
@@ -39,12 +59,45 @@ router.get("/:id", ensureAuthenticated, async (req, res) => {
 	}
 });
 
+router.get("/:id/collaborators", ensureAuthenticated, async (req, res) => {
+	const projectId = req.params.id;
+	const userId = req.user._id;
+	const filter = {
+		$and: [
+			{_id: projectId}, 
+			{
+				$or: [
+					{owner: userId},
+					{editors: userId},
+					{viewers: userId}
+				]
+			}
+		]
+	};
+
+	try {
+		const collaborators = await getCollaborators(filter);
+
+		res.status(200).json(collaborators);
+	} catch (err) {
+		console.error(err);
+		res.status(500);
+	}
+});
+
 router.post("/", ensureAuthenticated, async (req, res) => {
 	const userId = req.user._id;
+	const filter = {
+		$or: [
+			{owner: userId},
+			{editors: userId},
+			{viewers: userId}
+		]
+	};
 
 	try {
 		await addProject(userId);
-		const projects = await getProjects({owner: userId});
+		const projects = await getProjects(filter);
 
 		res.status(201).json(projects);
 	} catch (err) {
