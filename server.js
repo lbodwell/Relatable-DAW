@@ -90,8 +90,8 @@ app.get("*", (req, res) => {
 // Handle web sockets
 const io = socketio(server, {
 	cors: {
-		origin: "https://relatable-daw.com",
-		credentials: true
+		origin: "http://relatable-daw.com",
+		methods: ["GET", "POST"]
 	}
 });
 
