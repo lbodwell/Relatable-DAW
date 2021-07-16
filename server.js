@@ -5,7 +5,7 @@ const express = require("express");
 const socketio = require("socket.io");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
-//const cors = require("cors");
+const cors = require("cors");
 const session = require("express-session");
 const compression = require("compression");
 const methodOverride = require("method-override");
@@ -46,8 +46,8 @@ if (NODE_ENV === "development") {
 
 //Middleware processing
 app.use(cors({
-	credentials: true,
-	origin: "https://relatable-daw.herokuapp.com",
+	//credentials: true,
+	origin: "https://relatable-daw.herokuapp.com"
 }));
 app.use(helmet({
 	contentSecurityPolicy: false
