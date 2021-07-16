@@ -1,8 +1,6 @@
 import React from "react";
 
-import {Button, Icon} from "@material-ui/core";
 import GoogleLogin from "react-google-login";
-
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -36,7 +34,7 @@ const handleLoginFailure = err => {
 const LoginButton = ({onLogin}) => {
 	return (
 		<GoogleLogin
-			clientId={CLIENT_ID}
+			clientId={"756816866564-mn1qd1s3ruqif6bf2cpv00dui4c4ok9d.apps.googleusercontent.com"}
 			// Experimental custom button CSS
 			// render={renderProps => (
 			// 	<Button
