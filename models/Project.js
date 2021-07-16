@@ -18,12 +18,6 @@ const ProjectSchema = new Schema({
 		required: true,
 		default: []
 	},
-	viewers: {
-		type: [Schema.Types.ObjectId],
-		ref: "User",
-		required: true,
-		default: []
-	},
 	noteSequence: {
 		type: [Object],
 		required: true,

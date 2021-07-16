@@ -1,5 +1,5 @@
 const Project = require("../models/Project");
-const {getUsersByIds} = require("./user-controller");
+const {getUser, getUsersByIds} = require("./user-controller");
 
 const getProjects = async filter => {
 	try {
@@ -23,20 +23,10 @@ const getCollaborators = async filter => {
 
 		const project = await getProject(filter);
 		const editorIds = project.editors;
-		const viewerIds = project.viewers;
 
 		if (editorIds && editorIds.length !== 0) {
 			const editors = await getUsersByIds(editorIds);
-			editors.forEach(editor => {
-				collaborators.push({...editor._doc, role: "editor"});
-			});
-		}
-
-		if (viewerIds && viewerIds.length !== 0) {
-			const viewers = await getUsersByIds(viewerIds);
-			viewers.forEach(viewer => {
-				collaborators.push({...viewer._doc, role: "viewer"});
-			});
+			editors.forEach(editor => collaborators.push({...editor._doc}));
 		}
 
 		return collaborators;
@@ -59,21 +49,29 @@ const addProject = async userId => {
 	}
 };
 
-// TODO: move filter definition to route
-const updateProject = async (userId, projectId, update) => {
-	const filter = {
-		$and: [
-			{_id: projectId}, 
-			{
-				$or: [
-					{owner: userId},
-					{editors: userId},
-					{viewers: userId}
-				]
-			}
-		]
-	};
+const addCollaborator = async (filter, email) => {
+	try {
+		const project = await getProject(filter);
+		const {editors} = project;
 
+		const user = await getUser({email});
+		if (!user) {
+			return null;
+		}
+		const userId = user._id;
+
+		if (!editors.some(editor => editor._id === userId)) {
+			editors.push(userId);
+			await updateProject(filter, {editors});
+		}
+
+		return await getCollaborators(filter);
+	} catch (err) {
+		console.error(err);
+	}
+};
+
+const updateProject = async (filter, update) => {
 	try {
 		return await Project.findOneAndUpdate(filter, {...update, lastEdited: Date.now()});
 	} catch (err) {
@@ -81,24 +79,12 @@ const updateProject = async (userId, projectId, update) => {
 	}
 };
 
-// TODO: move filter definition to route
-const updateNoteSequence = async (userId, projectId, newNote) => {
+const updateNoteSequence = async (filter, newNote) => {
 	const noteId = newNote.id;
-	const filter = {
-		$and: [
-			{_id: projectId}, 
-			{
-				$or: [
-					{owner: userId},
-					{editors: userId},
-					{viewers: userId}
-				]
-			}
-		]
-	};
 	
 	try {
 		const project = await getProject(filter);
+
 		let newNoteSequence = [...project.noteSequence];
 		newNoteSequence[noteId] = newNote;
 		const update = {noteSequence: newNoteSequence, lastEdited: Date.now()};
@@ -109,11 +95,26 @@ const updateNoteSequence = async (userId, projectId, newNote) => {
 	}
 };
 
-const deleteProject = async (userId, projectId) => {
-	const filter = {_id: projectId, owner: userId};
-
+const deleteProject = async (filter, deletionFilter) => {
 	try {
-		return await Project.findOneAndDelete(filter);
+		await Project.findOneAndDelete(deletionFilter);
+
+		return await getProjects(filter);
+	} catch (err) {
+		console.error(err);
+	}
+};
+
+// ! Array.filter() should be usable here but doesn't work
+const deleteCollaborator = async (filter, deletionFilter, editorId) => {
+	try {
+		const project = await Project.findOne(deletionFilter);
+		const {editors} = project;
+		
+		const newEditors = editors.filter(editor => editor != editorId);
+		await updateProject(deletionFilter, {editors: newEditors});
+
+		return await getCollaborators(filter);
 	} catch (err) {
 		console.error(err);
 	}
@@ -124,7 +125,9 @@ module.exports = {
 	getProject,
 	getCollaborators,
 	addProject,
+	addCollaborator,
 	updateProject,
 	updateNoteSequence,
-	deleteProject
+	deleteProject,
+	deleteCollaborator
 };

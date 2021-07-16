@@ -117,6 +117,34 @@ io.on("connection", socket => {
 		}
 		socket.to(projectId).emit("notesCleared", {username});
 	});
+
+	socket.on("nameChanged", ({username, projectId, name}) => {
+		if (NODE_ENV === "development") {
+			console.log(`${username} has updated project name in project id: ${projectId}.`);
+		}
+		socket.to(projectId).emit("nameChanged", {username, name});
+	});
+
+	socket.on("keyChanged", ({username, projectId, keyCenter}) => {
+		if (NODE_ENV === "development") {
+			console.log(`${username} has updated project name in project id: ${projectId}.`);
+		}
+		socket.to(projectId).emit("keyChanged", {username, keyCenter});
+	});
+
+	socket.on("bpmChanged", ({username, projectId, bpm}) => {
+		if (NODE_ENV === "development") {
+			console.log(`${username} has updated the BPM in project id: ${projectId}.`);
+		}
+		socket.to(projectId).emit("bpmChanged", {username, bpm});
+	});
+
+	socket.on("volChanged", ({username, projectId, volume}) => {
+		if (NODE_ENV === "development") {
+			console.log(`${username} has updated the volume in project id: ${projectId}.`);
+		}
+		socket.to(projectId).emit("volChanged", {username, volume});
+	});
 });
 
 // Start server
