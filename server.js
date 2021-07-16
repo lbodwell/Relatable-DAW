@@ -45,15 +45,14 @@ if (NODE_ENV === "development") {
 }
 
 //Middleware processing
-// app.use(cors({
-// 	origin: "https://relatable-daw.com",
-// 	credentials: true
-// }));
-
 app.use(cors({
-	credentials: false,
-	origin: true
+	origin: "https://relatable-daw.com",
+	credentials: true
 }));
+
+// app.use(cors({
+// 	credentials: false,origin: true
+// }));
 app.use(helmet({
 	contentSecurityPolicy: false
 }));
@@ -73,8 +72,8 @@ app.use(methodOverride());
 
 // Routing
 app.options('*', cors({
-	credentials: false,
-    origin: true
+	origin: "https://relatable-daw.com",
+	credentials: true
 }));
 app.use("/api", apiRouter.router);
 app.use(express.static(path.join(__dirname, "client", "build")));
@@ -91,8 +90,8 @@ app.get("*", (req, res) => {
 // Handle web sockets
 const io = socketio(server, {
 	cors: {
-		credentials: false,
-    	origin: true
+		origin: "https://relatable-daw.com",
+		credentials: true
 	}
 });
 
