@@ -82,7 +82,7 @@ app.get("*", (req, res) => {
 // Handle web sockets
 const io = socketio(server, {
 	cors: {
-		origin: "http://67.205.185.42:5000/",
+		origin: "http://67.205.185.42:5000",
 		methods: ["GET", "POST"]
 	}
 });
