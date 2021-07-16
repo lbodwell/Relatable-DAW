@@ -44,11 +44,11 @@ if (NODE_ENV === "development") {
 	}));
 }
 
-// Middleware processing
-// app.use(cors({
-// 	credentials: true,
-// 	origin: FRONTEND_APP_URL,
-// }));
+//Middleware processing
+app.use(cors({
+	credentials: true,
+	origin: "https://relatable-daw.herokuapp.com",
+}));
 app.use(helmet({
 	contentSecurityPolicy: false
 }));
@@ -82,7 +82,7 @@ app.get("*", (req, res) => {
 // Handle web sockets
 const io = socketio(server, {
 	cors: {
-		origin: "https://relatable-daw.herokuapp.com/",
+		origin: "https://relatable-daw.herokuapp.com",
 		methods: ["GET", "POST"]
 	}
 });
