@@ -71,11 +71,11 @@ app.use(compression());
 app.use(express.json());
 app.use(methodOverride());
 
-// Routing
-// app.options('*', cors({
-// 	credentials: false,
-//     origin: true
-// }));
+Routing
+app.options('*', cors({
+	origin: "https://relatable-daw.com",
+	credentials: true
+}));
 app.use("/api", apiRouter.router);
 app.use(express.static(path.join(__dirname, "client", "build")));
 app.use(express.static("public"));
