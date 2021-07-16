@@ -10,6 +10,7 @@ import {
 	List,
 	ListItem,
 	ListItemAvatar,
+	ListItemIcon,
 	ListItemSecondaryAction,
 	ListItemText,
 	Typography
@@ -17,6 +18,7 @@ import {
 
 import AddIcon from "@material-ui/icons/Add";
 import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
+import MusicNoteIcon from '@material-ui/icons/MusicNote';
 import DeleteIcon from "@material-ui/icons/Delete";
 
 import MenuBar from "./MenuBar";
@@ -92,7 +94,7 @@ const HomePage = props => {
 		<div className="center-text">
 			{user ?
 				<div>
-					<Typography variant="h4">Projects</Typography>
+					<Typography variant="h4" style={{marginBottom: "1rem"}}>Projects</Typography>
 					<Button
 						variant="contained"
 						color="primary"
@@ -100,19 +102,22 @@ const HomePage = props => {
 						onClick={createNewProject}>
 						New
 					</Button>
-					<div className="projects-container" style={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+					<div className="projects-container" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "2rem"}}>
 						<List className="projects-list" style={{display: "flex", flexDirection: "column", alignItems: "stretch"}}>
-							{projects?.map((project, index) => {
-								return (
-									// TODO: Get owner object from id for each project to display avatar and name
+							{projects?.map((project, index) => (
 									<div key={index} style={{width: "24rem"}}>
 										<ListItem button onClick={() => navigateToProject(project._id)}>
+											{project.owner === user._id ?
+												<ListItemAvatar>
+													<Avatar src={user.picture}/>
+												</ListItemAvatar>
+											:
 											<ListItemAvatar>
-												{/* <Avatar src={owner.picture}/> */}
-												<Avatar src={user.picture}/>
-											</ListItemAvatar>
-											{/* <ListItemText primary={project.name} secondary={"Owner: " + (owner._id === user._id ? "You" : owner.name)}/> */}
-											<ListItemText primary={project.name} secondary={"Owner: " + (project.owner === user._id ? "You" : project.owner)}/>
+													<MusicNoteIcon/>
+													</ListItemAvatar>
+											}
+											
+											<ListItemText primary={project.name} secondary={(project.owner === user._id ? ("Created: " + (new Date(project.dateCreated)).toISOString().substring(0, 10)) : "Shared with you")}/>
 											<ListItemSecondaryAction>
 												<IconButton edge="end" onClick={() => deleteProject(project._id)}>
 													<DeleteIcon/>
@@ -121,8 +126,7 @@ const HomePage = props => {
 										</ListItem>
 										<Divider/>
 									</div>
-								);
-							})}
+							))}
 						</List>
 					</div>
 					<LogoutButton onLogout={loggedOut}/>

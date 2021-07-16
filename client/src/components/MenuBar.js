@@ -13,6 +13,8 @@ import {
 	Typography
 } from "@material-ui/core";
 
+import "../styles/MenuBar.css";
+
 const MenuBar = ({user}) => {
 	const [anchorEl, setAnchorEl] = useState(null);
 
@@ -28,6 +30,10 @@ const MenuBar = ({user}) => {
 		setAnchorEl(null);
 	};
 
+	const redirectToHome = () => {
+		history.push("/");
+	}
+
 	const redirectToAccount = () => {
 		history.push("/account");
 	};
@@ -38,7 +44,9 @@ const MenuBar = ({user}) => {
 				<Toolbar>
 					<Grid container justifyContent="space-between" alignItems="center">
 						<Grid item>
-							<Typography variant="h5">Relatable DAW</Typography>
+							<div className="title-container" onClick={redirectToHome}>
+								<Typography variant="h5" style={{userSelect: "none"}}>Relatable DAW</Typography>
+							</div>
 						</Grid>
 						{user &&
 							<Grid item>
