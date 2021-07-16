@@ -50,7 +50,10 @@ if (NODE_ENV === "development") {
 // 	origin: "https://relatable-daw.herokuapp.com"
 // }));
 
-app.use(cors());
+app.use(cors({
+	credentials: true,
+    origin: true
+}));
 app.use(helmet({
 	contentSecurityPolicy: false
 }));
@@ -69,7 +72,10 @@ app.use(express.json());
 app.use(methodOverride());
 
 // Routing
-app.options('*', cors());
+app.options('*', cors({
+	credentials: true,
+    origin: true
+}));
 app.use("/api", apiRouter.router);
 app.use(express.static(path.join(__dirname, "client", "build")));
 app.use(express.static("public"));
