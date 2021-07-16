@@ -14,7 +14,7 @@ const helmet = require("helmet");
 const {
 	PORT,
 	NODE_ENV,
-	//FRONTEND_APP_URL,
+	FRONTEND_APP_URL,
 	SESSION_SECRET,
 	MONGO_URI
 } = require("./config/env-handler");
