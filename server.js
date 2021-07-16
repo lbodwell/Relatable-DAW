@@ -14,7 +14,7 @@ const helmet = require("helmet");
 const {
 	PORT,
 	NODE_ENV,
-	//FRONTEND_APP_URL,
+	FRONTEND_APP_URL,
 	SESSION_SECRET,
 	MONGO_URI
 } = require("./config/env-handler");
@@ -46,7 +46,7 @@ if (NODE_ENV === "development") {
 
 //Middleware processing
 app.use(cors({
-	origin: "https://relatable-daw.com",
+	origin: FRONTEND_APP_URL,
 	credentials: true
 }));
 
@@ -72,7 +72,7 @@ app.use(methodOverride());
 
 // Routing
 app.options('*', cors({
-	origin: "https://relatable-daw.com",
+	origin: FRONTEND_APP_URL,
 	credentials: true
 }));
 app.use("/api", apiRouter.router);
@@ -90,7 +90,7 @@ app.get("*", (req, res) => {
 // Handle web sockets
 const io = socketio(server, {
 	cors: {
-		origin: "https://relatable-daw.com",
+		origin: FRONTEND_APP_URL,
 		methods: ["GET", "POST"]
 	}
 });
