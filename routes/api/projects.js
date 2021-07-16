@@ -228,7 +228,6 @@ router.delete("/:id/collaborators", ensureAuthenticated, async (req, res) => {
 	};
 
 	try {
-		console.log(editorId);
 		const collaborators = await deleteCollaborator(filter, deletionFilter, editorId);
 
 		res.status(200).json(collaborators);

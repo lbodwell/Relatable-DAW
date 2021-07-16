@@ -105,12 +105,11 @@ const deleteProject = async (filter, deletionFilter) => {
 	}
 };
 
-// ! Array.filter() should be usable here but doesn't work
 const deleteCollaborator = async (filter, deletionFilter, editorId) => {
 	try {
 		const project = await Project.findOne(deletionFilter);
 		const {editors} = project;
-		
+
 		const newEditors = editors.filter(editor => editor != editorId);
 		await updateProject(deletionFilter, {editors: newEditors});
 
