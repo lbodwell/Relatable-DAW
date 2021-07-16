@@ -81,10 +81,10 @@ app.get("*", (req, res) => {
 
 // Handle web sockets
 const io = socketio(server, {
-	// cors: {
-	// 	origin: FRONTEND_APP_URL,
-	// 	methods: ["GET", "POST"]
-	// }
+	cors: {
+		origin: FRONTEND_APP_URL,
+		methods: ["GET", "POST"]
+	}
 });
 
 io.on("connection", socket => {
