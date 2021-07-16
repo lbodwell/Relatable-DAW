@@ -123,8 +123,16 @@ const OptionsPanel = props => {
 		setAddCollaboratorEnabled(email.match(regex));
 	};
 
+	const handleKeyPress = evt => {
+		if (evt.key === "Enter") {
+			handleAddCollaborator();
+		}
+	}
+
 	const handleAddCollaborator = () => {
 		collaboratorAdded(projectId, collaboratorEmail);
+		setCollaboratorEmail("");
+		setAddCollaboratorEnabled(false);
 	};
 
 	const handleRemoveCollaborator = userId => {
@@ -243,6 +251,7 @@ const OptionsPanel = props => {
 										placeholder="someone@example.com"
 										value={collaboratorEmail}
 										onChange={handleEmailChange}
+										onKeyPress={handleKeyPress}
 									/>
 								</Grid>
 								<Grid item>
