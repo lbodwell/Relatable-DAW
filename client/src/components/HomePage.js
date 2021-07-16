@@ -31,7 +31,7 @@ const HomePage = props => {
 	const history = useHistory();
 
 	const fetchProjects = useCallback(async () => {
-		const res = await fetch("http://localhost:5000/api/projects", {
+		const res = await fetch("https://localhost:5000/api/projects", {
 			method: "GET",
 			credentials: "include"
 		});
@@ -51,7 +51,7 @@ const HomePage = props => {
 	}, [user, fetchProjects]);
 
 	const createNewProject = async () => {
-		const res = await fetch("http://localhost:5000/api/projects", {
+		const res = await fetch("https://localhost:5000/api/projects", {
 			method: "POST",
 			credentials: "include"
 		});
@@ -65,7 +65,7 @@ const HomePage = props => {
 	};
 
 	const deleteProject = async projectId => {
-		const res = await fetch(`http://localhost:5000/api/projects/${projectId}`, {
+		const res = await fetch(`https://localhost:5000/api/projects/${projectId}`, {
 			method: "DELETE",
 			credentials: "include"
 		});
