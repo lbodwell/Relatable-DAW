@@ -45,10 +45,10 @@ if (NODE_ENV === "development") {
 }
 
 //Middleware processing
-// app.use(cors({
-// 	//credentials: true,
-// 	origin: "https://relatable-daw.herokuapp.com"
-// }));
+app.use(cors({
+	//credentials: true,
+	origin: "http://67.205.185.42"
+}));
 
 app.use(cors({
 	credentials: false,
@@ -72,10 +72,10 @@ app.use(express.json());
 app.use(methodOverride());
 
 // Routing
-app.options('*', cors({
-	credentials: false,
-    origin: true
-}));
+// app.options('*', cors({
+// 	credentials: false,
+//     origin: true
+// }));
 app.use("/api", apiRouter.router);
 app.use(express.static(path.join(__dirname, "client", "build")));
 app.use(express.static("public"));
@@ -91,7 +91,7 @@ app.get("*", (req, res) => {
 // Handle web sockets
 const io = socketio(server, {
 	cors: {
-		origin: "https://relatable-daw.herokuapp.com",
+		origin: "http://67.205.185.42",
 		methods: ["GET", "POST"]
 	}
 });
