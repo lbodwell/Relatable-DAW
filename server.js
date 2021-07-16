@@ -46,7 +46,7 @@ if (NODE_ENV === "development") {
 
 //Middleware processing
 app.use(cors({
-	//credentials: true,
+	credentials: true,
 	origin: "http://relatable-daw.com"
 }));
 

@@ -19,8 +19,6 @@ const numRows = (12 * 3 + 1) * 2;
 // 4 beats per measure times 8 measures times 4 "pixels" per beat
 const minSequencerLength = 4 * 8 * 4;
 
-let appVol;
-
 const Sequencer = props => {
 	const {
 		user,

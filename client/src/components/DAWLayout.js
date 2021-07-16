@@ -120,6 +120,7 @@ const DAWLayout = props => {
 	const updateNoteSequence = async (id, newNote) => {
 		const res = await fetch(`/api/projects/${id}/notes`, {
 			method: "PATCH",
+			credentials: "include",
 			body: JSON.stringify({newNote}),
 			headers: {
 				"Content-Type": "application/json"
@@ -135,6 +136,7 @@ const DAWLayout = props => {
 	const addCollaborator = async (id, email) => {
 		const res = await fetch(`/api/projects/${id}/collaborators`, {
 			method: "POST",
+			credentials: "include",
 			body: JSON.stringify({email}),
 			headers: {
 				"Content-Type": "application/json"
@@ -153,6 +155,7 @@ const DAWLayout = props => {
 	const removeCollaborator = async (id, editorId) => {
 		const res = await fetch(`/api/projects/${id}/collaborators`, {
 			method: "DELETE",
+			credentials: "include",
 			body: JSON.stringify({editorId}),
 			headers: {
 				"Content-Type": "application/json"
@@ -160,7 +163,6 @@ const DAWLayout = props => {
 		});
 
 		const collaborators = await res.json();
-		console.log(collaborators);
 		if (collaborators) {
 			setCollaborators(collaborators);
 		} else {
