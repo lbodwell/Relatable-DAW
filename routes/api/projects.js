@@ -197,7 +197,7 @@ router.delete("/:id", ensureAuthenticated, async (req, res) => {
 	};
 
 	try {
-		await deleteProject(filter, deletionFilter);
+		const projects = await deleteProject(filter, deletionFilter);
 
 		res.status(200).json(projects);
 	} catch (err) {
