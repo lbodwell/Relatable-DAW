@@ -46,8 +46,8 @@ if (NODE_ENV === "development") {
 
 //Middleware processing
 app.use(cors({
-	credentials: true,
-	origin: "https://relatable-daw.com"
+	origin: "https://relatable-daw.com",
+	credentials: true
 }));
 
 app.use(cors({
@@ -92,7 +92,8 @@ app.get("*", (req, res) => {
 const io = socketio(server, {
 	cors: {
 		origin: "https://relatable-daw.com",
-		methods: ["GET", "POST"]
+		methods: ["GET", "POST"],
+		credentials: true
 	}
 });
 
