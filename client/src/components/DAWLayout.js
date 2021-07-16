@@ -37,8 +37,7 @@ const DAWLayout = props => {
 
 	const fetchProject = useCallback(async id => {
 		const res = await fetch(`/api/projects/${id}`, {
-			method: "GET",
-			credentials: "include"
+			method: "GET"
 		});
 
 		const project = await res.json();
@@ -57,8 +56,7 @@ const DAWLayout = props => {
 
 	const fetchCollaborators = useCallback(async id => {
 		const res = await fetch(`/api/projects/${id}/collaborators`, {
-			method: "GET",
-			credentials: "include"
+			method: "GET"
 		});
 
 		const collaborators = await res.json();
@@ -107,7 +105,6 @@ const DAWLayout = props => {
 	const updateProject = async (id, update) => {
 		const res = await fetch(`/api/projects/${id}`, {
 			method: "PATCH",
-			credentials: "include",
 			body: JSON.stringify({update}),
 			headers: {
 				"Content-Type": "application/json"
@@ -123,7 +120,6 @@ const DAWLayout = props => {
 	const updateNoteSequence = async (id, newNote) => {
 		const res = await fetch(`/api/projects/${id}/notes`, {
 			method: "PATCH",
-			credentials: "include",
 			body: JSON.stringify({newNote}),
 			headers: {
 				"Content-Type": "application/json"
@@ -139,7 +135,6 @@ const DAWLayout = props => {
 	const addCollaborator = async (id, email) => {
 		const res = await fetch(`/api/projects/${id}/collaborators`, {
 			method: "POST",
-			credentials: "include",
 			body: JSON.stringify({email}),
 			headers: {
 				"Content-Type": "application/json"
@@ -158,7 +153,6 @@ const DAWLayout = props => {
 	const removeCollaborator = async (id, editorId) => {
 		const res = await fetch(`/api/projects/${id}/collaborators`, {
 			method: "DELETE",
-			credentials: "include",
 			body: JSON.stringify({editorId}),
 			headers: {
 				"Content-Type": "application/json"

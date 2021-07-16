@@ -45,10 +45,6 @@ if (NODE_ENV === "development") {
 }
 
 // Middleware processing
-app.use(cors({
-	credentials: true,
-	origin: FRONTEND_APP_URL,
-}));
 app.use(helmet({
 	contentSecurityPolicy: false
 }));
