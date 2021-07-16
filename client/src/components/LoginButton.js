@@ -7,7 +7,7 @@ const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const handleLoginSuccess = async (googleData, onLogin) => {
 	window.localStorage.setItem("tokenId", googleData.tokenId);
 	
-	const res = await fetch("https://localhost:5000/api/auth/google", {
+	const res = await fetch("/api/auth/google", {
 		method: "POST",
 		credentials: "include",
 		body: JSON.stringify({
