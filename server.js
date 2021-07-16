@@ -45,14 +45,14 @@ if (NODE_ENV === "development") {
 }
 
 //Middleware processing
-app.use(cors({
-	origin: "https://relatable-daw.com",
-	credentials: true
-}));
+// app.use(cors({
+// 	origin: "https://relatable-daw.com",
+// 	credentials: true
+// }));
 
 app.use(cors({
 	credentials: false,
-    origin: true
+	origin: true
 }));
 app.use(helmet({
 	contentSecurityPolicy: false
@@ -91,9 +91,8 @@ app.get("*", (req, res) => {
 // Handle web sockets
 const io = socketio(server, {
 	cors: {
-		origin: "https://relatable-daw.com",
-		methods: ["GET", "POST"],
-		credentials: true
+		credentials: false,
+    	origin: true
 	}
 });
 
