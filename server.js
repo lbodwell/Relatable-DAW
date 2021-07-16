@@ -80,13 +80,12 @@ app.get("*", (req, res) => {
 });
 
 // Handle web sockets
-// const io = socketio(server, {
-// 	cors: {
-// 		origin: "https://relatable-daw.herokuapp.com/",
-// 		methods: ["GET", "POST"]
-// 	}
-// });
-const io = socketio(server);
+const io = socketio(server, {
+	cors: {
+		origin: "https://relatable-daw.herokuapp.com/",
+		methods: ["GET", "POST"]
+	}
+});
 
 io.on("connection", socket => {
 	socket.on("join", ({username, projectId}) => {
