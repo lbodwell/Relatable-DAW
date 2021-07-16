@@ -51,7 +51,7 @@ if (NODE_ENV === "development") {
 // }));
 
 app.use(cors({
-	credentials: true,
+	credentials: false,
     origin: true
 }));
 app.use(helmet({
@@ -73,7 +73,7 @@ app.use(methodOverride());
 
 // Routing
 app.options('*', cors({
-	credentials: true,
+	credentials: false,
     origin: true
 }));
 app.use("/api", apiRouter.router);
