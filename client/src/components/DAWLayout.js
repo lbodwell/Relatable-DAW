@@ -52,7 +52,7 @@ const DAWLayout = props => {
 			history.push("/404");
 			console.error("Failed to access project");
 		}
-	}, []);
+	}, [history]);
 
 	const fetchCollaborators = useCallback(async id => {
 		const res = await fetch(`/api/projects/${id}/collaborators`, {

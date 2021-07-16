@@ -5,7 +5,7 @@ const express = require("express");
 const socketio = require("socket.io");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
-const cors = require("cors");
+//const cors = require("cors");
 const session = require("express-session");
 const compression = require("compression");
 const methodOverride = require("method-override");
@@ -14,7 +14,7 @@ const helmet = require("helmet");
 const {
 	PORT,
 	NODE_ENV,
-	FRONTEND_APP_URL,
+	//FRONTEND_APP_URL,
 	SESSION_SECRET,
 	MONGO_URI
 } = require("./config/env-handler");
@@ -45,6 +45,10 @@ if (NODE_ENV === "development") {
 }
 
 // Middleware processing
+// app.use(cors({
+// 	credentials: true,
+// 	origin: FRONTEND_APP_URL,
+// }));
 app.use(helmet({
 	contentSecurityPolicy: false
 }));
@@ -77,10 +81,10 @@ app.get("*", (req, res) => {
 
 // Handle web sockets
 const io = socketio(server, {
-	cors: {
-		origin: FRONTEND_APP_URL,
-		methods: ["GET", "POST"]
-	}
+	// cors: {
+	// 	origin: FRONTEND_APP_URL,
+	// 	methods: ["GET", "POST"]
+	// }
 });
 
 io.on("connection", socket => {
