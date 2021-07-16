@@ -36,7 +36,7 @@ const ProjectSchema = new Schema({
 	volume: {
 		type: Number,
 		required: true,
-		default: 100
+		default: 1
 	},
 	synth: {
 		type: Object,

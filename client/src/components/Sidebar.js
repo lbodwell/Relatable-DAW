@@ -83,7 +83,7 @@ const Sidebar = props => {
 	};
 
 	const handleParentChange = evt => {
-		const newParent = evt.target.value;
+		const newParent = parseInt(evt.target.value);
 
 		setCurrentInterval(newParent);
 		let newNote = {...selectedNote};

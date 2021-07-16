@@ -19,6 +19,17 @@ const numRows = (12 * 3 + 1) * 2;
 // 4 beats per measure times 8 measures times 4 "pixels" per beat
 const minSequencerLength = 4 * 8 * 4;
 
+const durationMappings = {
+	0.25: "16n",
+	0.5: "8n",
+	0.75: "8n.",
+	1: "4n",
+	1.5: "4n.",
+	2: "2n",
+	3: "2n.",
+	4: "1m"
+};
+
 const Sequencer = props => {
 	const {
 		user,
@@ -129,7 +140,6 @@ const Sequencer = props => {
 			} else {
 				const parentPitch = newPitches[relation.parent];
 				if (parentPitch) {
-					
 					pitch = Note.simplify(transpose(newPitches[relation.parent], relation.interval));
 				} else {
 					console.error("Parent pitch undefined");
@@ -141,6 +151,11 @@ const Sequencer = props => {
 
 		setPitches(newPitches);
 	}, [noteSequence, keyCenter]);
+
+	useEffect(() => {
+		part.current?.stop();
+		part.current = null;
+	}, [keyCenter]);
 
 	// Note positioning
 	useEffect(() => {
@@ -188,17 +203,6 @@ const Sequencer = props => {
 	useEffect(() => {
 		if (playbackStatus === "Playing") {
 			if (!part.current) {
-				const durationMappings = {
-					0.25: "16n",
-					0.5: "8n",
-					0.75: "8n.",
-					1: "4n",
-					1.5: "4n.",
-					2: "2n",
-					3: "2n.",
-					4: "1m"
-				};
-		
 				let partSequence = [];
 				let end;
 
@@ -208,7 +212,6 @@ const Sequencer = props => {
 					const duration = durationMappings[note.duration];
 
 					if (note.id === noteSequence.length - 1) {
-						// TODO: Clean up by parsing BBS from start and note.duration instead of converting to seconds and back
 						const timeInSeconds = Tone.Time(time).toSeconds();
 						const durationInSeconds = Tone.Time(duration).toSeconds();
 						end = Tone.Time(timeInSeconds + durationInSeconds).toBarsBeatsSixteenths();
@@ -216,7 +219,6 @@ const Sequencer = props => {
 					partSequence.push([time, {pitch: pitches[note.id], duration}]);
 				});
 
-				console.log(synth.current);
 				const newPart = new Tone.Part((time, note) => {
 					synth.current.triggerAttackRelease(note.pitch, note.duration, time);
 				}, partSequence);
@@ -246,7 +248,7 @@ const Sequencer = props => {
 
 			setNoteSequence(newNoteSequence);
 		}
-	}, [noteSequence, selectedNote, prevNote]);
+	}, [noteSequence, selectedNote, prevNote, keyCenter]);
 
 	// Add new note
 	useEffect(() => {

@@ -34,18 +34,7 @@ const handleLoginFailure = err => {
 const LoginButton = ({onLogin}) => {
 	return (
 		<GoogleLogin
-			// ! Env var is not working so client id is hardcoded temporarily. Needs to be fixed ASAP.
 			clientId={CLIENT_ID}
-			// Experimental custom button CSS
-			// render={renderProps => (
-			// 	<Button
-			// 		variant="contained"
-			// 		color="primary"
-			// 		onClick={renderProps.onClick}
-			// 		disabled={renderProps.disabled}>
-			// 		Log in with Google
-			// 	</Button>
-			// )}
 			buttonText={"LOG IN WITH GOOGLE"}
 			onSuccess={googleData => handleLoginSuccess(googleData, onLogin)}
 			onFailure={handleLoginFailure}
