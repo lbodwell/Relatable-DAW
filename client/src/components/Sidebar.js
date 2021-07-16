@@ -1,6 +1,18 @@
 import {useEffect, useState} from "react";
 
-import {Cell, Grid} from "styled-css-grid";
+import {
+	Button,
+	Grid,
+	InputLabel,
+	MenuItem,
+	Select,
+	TextField,
+	Typography
+} from "@material-ui/core";
+
+import AddIcon from '@material-ui/icons/Add';
+import ClearIcon from '@material-ui/icons/Clear';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 import "../styles/Sidebar.css";
 
@@ -33,8 +45,6 @@ const durationMappings = {
 
 const Sidebar = props => {
 	const {
-		user,
-		projectId,
 		projectName,
 		projectNameChanged,
 		selectedNote,
@@ -46,11 +56,11 @@ const Sidebar = props => {
 
 	const [localProjectName, setLocalProjectName] = useState("");
 	const [parentNotes, setParentNotes] = useState([]);
-	const [currentParent, setCurrentParent] = useState();
-	const [currentInterval, setCurrentInterval] = useState();
-	const [currentDirection, setCurrentDirection] = useState();
-	const [currentDuration, setCurrentDuration] = useState();
-	const [currentDelay, setCurrentDelay] = useState();
+	const [currentParent, setCurrentParent] = useState(null);
+	const [currentInterval, setCurrentInterval] = useState(null);
+	const [currentDirection, setCurrentDirection] = useState(null);
+	const [currentDuration, setCurrentDuration] = useState(null);
+	const [currentDelay, setCurrentDelay] = useState(null);
 	
 	useEffect(() => {
 		let prevNotes = [];
@@ -58,11 +68,19 @@ const Sidebar = props => {
 			prevNotes.push(i); 
 		}
 		setParentNotes(prevNotes);
-		setCurrentParent(selectedNote?.relation.parent);
-		setCurrentInterval(selectedNote?.relation.interval?.slice(-2));
-		setCurrentDirection(selectedNote?.relation.interval?.substring(0, 1) !== "-" ? "UP" : "DOWN");
-		setCurrentDuration(selectedNote?.duration);
-		setCurrentDelay(selectedNote?.delay);
+		if (selectedNote) {
+			setCurrentParent(selectedNote?.relation.parent);
+			setCurrentInterval(selectedNote?.relation.interval?.slice(-2));
+			setCurrentDirection(selectedNote?.relation.interval?.substring(0, 1) !== "-" ? "UP" : "DOWN");
+			setCurrentDuration(selectedNote?.duration);
+			setCurrentDelay(selectedNote?.delay);
+		} else {
+			setCurrentParent(null);
+			setCurrentInterval(null);
+			setCurrentDirection(null);
+			setCurrentDuration(null);
+			setCurrentDelay(null);
+		}
 	}, [selectedNote]);
 
 	useEffect(() => {
@@ -146,83 +164,117 @@ const Sidebar = props => {
 
 	return (
 		<>
-			{(user && projectId) &&
-				<div className="center-text">
-					<label htmlFor="project-name">Project Name: </label>
-					<input
-						name="project-name" 
-						type="text" 
-						value={localProjectName} 
-						onChange={handleNameChange} 
-						onBlur={evt => projectNameChanged(evt.target.value)}
-						onKeyPress={handleKeyPress}
-					/>
-				</div>
-			}
+			<div className="center-text">
+				<TextField
+					label="Project name"
+					variant="outlined"
+					size="small"
+					value={localProjectName}
+					onChange={handleNameChange}
+					onBlur={evt => projectNameChanged(evt.target.value)}
+					onKeyPress={handleKeyPress}
+				/>
+			</div>
 			<div className="note-editor">
-				<h1>Note Editor</h1>
-				<Grid columns={"8rem 8rem"} justifyContent="center">
-					<Cell>
-						<button onClick={() => addRequested(true)}>Add Note</button>
-					</Cell>
-					<Cell>
-						<button onClick={() => clearRequested(true)}>Clear Notes</button>
-					</Cell>
+				<Typography variant="h4" style={{fontWeight: "bold", marginTop: "2rem", marginBottom: "1rem"}}>
+					Note Editor
+				</Typography>
+				<Grid container justifyContent="space-evenly">
+					<Grid item>
+						<Button
+							variant="contained"
+							size="small"
+							color="primary"
+							startIcon={<AddIcon/>}
+							onClick={() => addRequested(true)}>
+							Add note
+						</Button>
+					</Grid>
+					<Grid item>
+						<Button
+							variant="contained"
+							size="small"
+							color="primary"
+							startIcon={<ClearIcon/>}
+							onClick={() => clearRequested(true)}>
+							Clear notes
+						</Button>
+					</Grid>
+					
 				</Grid>
-				<h2>Selected Note: {selectedNote?.id + 1 || "None"}</h2>
+				<Typography variant="h5" style={{fontWeight: "bold", marginTop: "2rem"}}>Selected note: {selectedNote?.id + 1 || "None"}</Typography>
 				{selectedNote &&
 					<div>
-						<h3>Relation</h3>
-						<Grid columns="1">
-							<Cell>
-								<label htmlFor="parent">Parent note: </label>
-								<select name="parent" value={currentParent} onChange={handleParentChange}>
-									<option key={0} value={-1}>Key Center</option>
+						<Typography variant="h6" style={{fontWeight: "bold", marginTop: "1rem"}}>Relation</Typography>
+						<Grid container direction="row" justifyContent="space-evenly" spacing="2">
+							<Grid item>
+								<InputLabel id="parent" shrink>Parent note</InputLabel>
+								<Select
+									labelId="parent"
+									value={currentParent}
+									onChange={handleParentChange}>
 									{parentNotes?.map((id) => (
-										<option key={id} value={id}>{`Note ${id + 1}`}</option>
+										<MenuItem key={id} value={id}>{`Note ${id + 1}`}</MenuItem>
 									))}
-								</select>
-							</Cell>
-							<Cell>
-								<label htmlFor="interval">Interval: </label>
-								<select name="interval" value={currentInterval} onChange={handleIntervalChange}>
+								</Select>
+							</Grid>
+							<Grid item>
+								<InputLabel id="interval" shrink>Interval</InputLabel>
+								<Select
+									labelId="interval"
+									value={currentInterval} 
+									onChange={handleIntervalChange}>
 									{Object.keys(intervalMappings).map((interval, index) => (
-										<option key={index} value={interval}>{intervalMappings[interval]}</option>
+										<MenuItem key={index} value={interval}>{intervalMappings[interval]}</MenuItem>
 									))}
-								</select>
-							</Cell>
-							<Cell>
-								{
-									//TODO: replace with switch component
-								}
-								<label htmlFor="direction">Direction: </label>
-								<select name="direction" value={currentDirection} onChange={handleDirectionChange}>
-									<option value={"UP"}>Up</option>
-									<option value={"DOWN"}>Down</option>
-								</select>
-							</Cell>
+								</Select>
+							</Grid>
+							<Grid item>
+								<InputLabel id="direction" shrink>Interval</InputLabel>
+								<Select
+									labelId="direction"
+									value={currentDirection} 
+									onChange={handleDirectionChange}>
+									<MenuItem value={"UP"}>Up</MenuItem>
+									<MenuItem value={"DOWN"}>Down</MenuItem>
+								</Select>
+							</Grid>
 						</Grid>
-						<h3>Timing</h3>
-						<Grid columns={1}>
-							<Cell>
-								<label htmlFor="duration">Duration: </label>
-								<select name="duration" value={currentDuration} onChange={handleDurationChange}>
+						<Typography variant="h6" style={{fontWeight: "bold", marginTop: "1rem"}}>Timing</Typography>
+						<Grid container direction="row" justifyContent="space-evenly" spacing="2">
+							<Grid item>
+								<InputLabel id="duration" shrink>Duration</InputLabel>
+								<Select
+									labelId="duration"
+									value={currentDuration} 
+									onChange={handleDurationChange}>
 									{Object.keys(durationMappings).sort().reverse().map((duration, index) => (
-										<option key={index} value={duration}>{durationMappings[duration]}</option>
+										<MenuItem key={index} value={duration}>{durationMappings[duration]}</MenuItem>
 									))}
-								</select>
-							</Cell>
-							<Cell>
-								<label htmlFor="delay">Delay: </label>
-								<select name="delay" value={currentDelay} onChange={handleDelayChange}>
-									<option key={0} value={0}>None</option>
+								</Select>
+							</Grid>
+							<Grid item>
+								<InputLabel id="delay" shrink>Delay</InputLabel>
+								<Select
+									labelId="delay"
+									value={currentDelay} 
+									onChange={handleDelayChange}>
+									<MenuItem key={0} value={0}>None</MenuItem>
 									{Object.keys(durationMappings).sort().reverse().map((duration, index) => (
-										<option key={index + 1} value={duration}>{durationMappings[duration]}</option>
+										<MenuItem key={index + 1} value={duration}>{durationMappings[duration]}</MenuItem>
 									))}
-								</select>
-							</Cell>
+								</Select>
+							</Grid>
 						</Grid>
-						<button className="btn-delete" onClick={() => deleteRequested(selectedNote)}>Delete Note</button>
+						<Button
+							variant="contained"
+							size="small"
+							color="primary"
+							startIcon={<DeleteIcon/>}
+							style={{marginTop: "2rem"}}
+							onClick={() => deleteRequested(selectedNote)}>
+							Delete note
+						</Button>
 					</div>
 				}
 			</div>

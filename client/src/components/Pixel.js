@@ -20,13 +20,13 @@ const Pixel = props => {
 
 	const prevNote = usePrev(selectedNote);
 
-	useEffect(() => {
-		// TODO: fix issue with animation restarting as soon as note is clicked (usePrev doesn't seem to be working)
-		if (selectedNote?.id !== undefined && noteId === selectedNote?.id && prevNote?.id === selectedNote?.id) {
-			pixelRef.current.style.animationName = undefined;
-			setTimeout(() => pixelRef.current.style.animation = "", 1);
-		}
-	}, [noteId, selectedNote, prevNote]);
+	// useEffect(() => {
+	// 	// TODO: fix issue with animation restarting as soon as note is clicked (usePrev doesn't seem to be working)
+	// 	if (selectedNote?.id !== undefined && noteId === selectedNote?.id && prevNote?.id === selectedNote?.id) {
+	// 		pixelRef.current.style.animationName = undefined;
+	// 		setTimeout(() => pixelRef.current.style.animation = "", 1);
+	// 	}
+	// }, [noteId, selectedNote, prevNote]);
 	
 	return (
 		<div

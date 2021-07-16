@@ -1,6 +1,7 @@
 .pixel {
 	width: 1rem;
 	height: 1rem;
+	transition: 1s;
 }
 
 .note:hover {
@@ -12,7 +13,7 @@
 		filter: brightness(1);
 		-webkit-filter: brightness(1);
 	}
-	50% {
+	100% {
 		filter: brightness(0.5);
 		-webkit-filter: brightness(0.5);
 	}
@@ -23,7 +24,8 @@
 }
 
 .selected {
-	animation-name: selected-breathe;
+	/* animation-name: selected-breathe;
 	animation-duration: 2s;
-	animation-iteration-count: infinite;
+	animation-iteration-count: infinite; */
+	filter: brightness(50%);
 }
