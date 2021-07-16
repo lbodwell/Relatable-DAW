@@ -89,9 +89,9 @@ app.get("*", (req, res) => {
 
 // Handle web sockets
 const io = socketio(server, {
-	cors: {
-		origin: FRONTEND_APP_URL,
-		methods: ["GET", "POST"]
+	cors: {    
+		origin: "*",    
+		methods: ["GET", "POST"]  
 	}
 });
 
@@ -128,14 +128,14 @@ io.on("connection", socket => {
 
 	socket.on("nameChanged", ({username, projectId, name}) => {
 		if (NODE_ENV === "development") {
-			console.log(`${username} has updated project name in project id: ${projectId}.`);
+			console.log(`${username} has updated the project name in project id: ${projectId}.`);
 		}
 		socket.to(projectId).emit("nameChanged", {username, name});
 	});
 
 	socket.on("keyChanged", ({username, projectId, keyCenter}) => {
 		if (NODE_ENV === "development") {
-			console.log(`${username} has updated project name in project id: ${projectId}.`);
+			console.log(`${username} has updated the key center in project id: ${projectId}.`);
 		}
 		socket.to(projectId).emit("keyChanged", {username, keyCenter});
 	});
