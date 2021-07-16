@@ -50,7 +50,7 @@ if (NODE_ENV === "development") {
 // 	origin: "https://relatable-daw.herokuapp.com"
 // }));
 
-app.use(cords());
+app.use(cors());
 app.use(helmet({
 	contentSecurityPolicy: false
 }));
