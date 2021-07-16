@@ -19,6 +19,8 @@ const numRows = (12 * 3 + 1) * 2;
 // 4 beats per measure times 8 measures times 4 "pixels" per beat
 const minSequencerLength = 4 * 8 * 4;
 
+let appVol;
+
 const Sequencer = props => {
 	const {
 		user,
@@ -29,6 +31,7 @@ const Sequencer = props => {
 		keyCenter,
 		bpm,
 		volume,
+		synthType,
 		noteSelected,
 		noteUpdated,
 		noteToDelete,
@@ -41,13 +44,14 @@ const Sequencer = props => {
 		handleClearNotes
 	} = props;
 	
-	const [synth, setSynth] = useState(null);
+	//const [synth, setSynth] = useState(null);
 	const [noteSequence, setNoteSequence] = useState([]);
 	const [pitches, setPitches] = useState([]);
 	const [positions, setPositions] = useState([]);
 	const [rows, setRows] = useState([]);
 	const [sequencerLength, setSequencerLength] = useState(minSequencerLength);
 
+	const synth = useRef(null);
 	const part = useRef(null);
 
 	const prevNote = usePrev(selectedNote);
@@ -81,10 +85,17 @@ const Sequencer = props => {
 		return newNoteSequence;
 	}, [noteSequence, noteDeleted, noteSelected]);
 
-	// Initial setup
 	useEffect(() => {
-		setSynth(new Tone.Synth().toDestination());
-	}, []);
+		const newSynth = new Tone.Synth({
+			oscillator: {
+				volume: volume ?? 10,
+				count: 3,
+				spread: 40,
+				type: synthType ?? "triangle"
+			}
+		}).toDestination();
+		synth.current = newSynth;
+	}, [volume, synthType]);
 
 	// Delete and clear notes on socket emissions
 	useEffect(() => {
@@ -206,9 +217,10 @@ const Sequencer = props => {
 					}
 					partSequence.push([time, {pitch: pitches[note.id], duration}]);
 				});
-				
+
+				console.log(synth.current);
 				const newPart = new Tone.Part((time, note) => {
-					synth.triggerAttackRelease(note.pitch, note.duration, time);
+					synth.current.triggerAttackRelease(note.pitch, note.duration, time);
 				}, partSequence);
 				
 				newPart.loopStart = 0;

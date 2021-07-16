@@ -2,17 +2,13 @@ import {useCallback, useEffect, useState} from "react";
 import {useHistory, useParams} from "react-router-dom";
 
 import {Cell, Grid} from "styled-css-grid";
-import {
-	AppBar,
-	Toolbar,
-	Typography
-} from "@material-ui/core";
 
 import * as Tone from "tone";
 
+import MenuBar from "./MenuBar";
 import Sequencer from "./Sequencer";
 import Sidebar from "./Sidebar";
-import OptionsManager from "./OptionsManager";
+import OptionsPanel from "./OptionsPanel";
 import {handleLoginSuccess} from "./LoginButton";
 
 import socket from "../socket-connection";
@@ -27,6 +23,7 @@ const DAWLayout = props => {
 	const [keyCenter, setKeyCenter] = useState("C");
 	const [bpm, setBpm] = useState();
 	const [volume, setVolume] = useState();
+	const [synthType, setSynthType] = useState();
 	const [selectedNote, setSelectedNote] = useState(null);
 	const [noteToDelete, setNoteToDelete] = useState(null);
 	const [noteAddRequested, setNoteAddRequested] = useState(false);
@@ -50,9 +47,10 @@ const DAWLayout = props => {
 			setKeyCenter(project.keyCenter);
 			setBpm(project.bpm);
 			setVolume(project.volume);
-			setCollaborators([...project.editors, ...project.viewers]);
+			setSynthType(project.synth?.waveType);
 			setInitNoteSequence(project.noteSequence);
 		} else {
+			history.push("/404");
 			console.error("Failed to access project");
 		}
 	}, []);
@@ -64,7 +62,6 @@ const DAWLayout = props => {
 		});
 
 		const collaborators = await res.json();
-		console.log(collaborators);
 		if (collaborators) {
 			setCollaborators(collaborators);
 		} else {
@@ -96,6 +93,14 @@ const DAWLayout = props => {
 			socket.on("connection", message => console.log(message));
 
 			socket.on("noteEdited", ({newNote}) => setSelectedNote(newNote));
+			
+			socket.on("nameChanged", ({name}) => setProjectName(name));
+
+			socket.on("keyChanged", ({keyCenter}) => setKeyCenter(keyCenter));
+
+			socket.on("bpmChanged", ({bpm}) => setBpm(bpm));
+
+			socket.on("volChanged", ({volume}) => setVolume(volume));
 		}
 	}, [user, projectId]); 
 
@@ -128,6 +133,44 @@ const DAWLayout = props => {
 		const project = await res.json();
 		if (!project) {
 			console.error("Failed to update note sequence");
+		}
+	};
+
+	const addCollaborator = async (id, email) => {
+		const res = await fetch(`http://localhost:5000/api/projects/${id}/collaborators`, {
+			method: "POST",
+			credentials: "include",
+			body: JSON.stringify({email}),
+			headers: {
+				"Content-Type": "application/json"
+			}
+		});
+
+		const collaborators = await res.json();
+		if (collaborators) {
+			setCollaborators(collaborators);
+		} else {
+			alert("Could not find a user with that email!");
+			console.error("Failed to add collaborator");
+		}
+	};
+
+	const removeCollaborator = async (id, editorId) => {
+		const res = await fetch(`http://localhost:5000/api/projects/${id}/collaborators`, {
+			method: "DELETE",
+			credentials: "include",
+			body: JSON.stringify({editorId}),
+			headers: {
+				"Content-Type": "application/json"
+			}
+		});
+
+		const collaborators = await res.json();
+		console.log(collaborators);
+		if (collaborators) {
+			setCollaborators(collaborators);
+		} else {
+			console.error("Failed to remove collaborator");
 		}
 	};
 
@@ -167,7 +210,6 @@ const DAWLayout = props => {
 			}
 
 			socket.emit("noteDeleted", message);
-			console.log(newSequence);
 			updateProject(projectId, {noteSequence: newSequence});
 		}
 	};
@@ -176,6 +218,13 @@ const DAWLayout = props => {
 		setProjectName(newProjectName);
 
 		if (user && projectId) {
+			const message = {
+				username: user.name,
+				projectId,
+				name: newProjectName
+			};
+
+			socket.emit("nameChanged", message);
 			updateProject(projectId, {name: newProjectName});
 		}
 	};
@@ -184,6 +233,13 @@ const DAWLayout = props => {
 		setKeyCenter(newKeyCenter);
 
 		if (user && projectId) {
+			const message = {
+				username: user.name,
+				projectId,
+				keyCenter: newKeyCenter
+			};
+
+			socket.emit("keyChanged", message);
 			updateProject(projectId, {keyCenter: newKeyCenter});
 		}
 	};
@@ -192,6 +248,14 @@ const DAWLayout = props => {
 		setBpm(newBpm);
 
 		if (user && projectId) {
+			const message = {
+				username: user.name,
+				projectId,
+				bpm: newBpm
+			};
+
+			socket.emit("bpmChanged", message);
+
 			updateProject(projectId, {bpm: newBpm});
 		}
 	};
@@ -200,6 +264,13 @@ const DAWLayout = props => {
 		setVolume(newVolume);
 		
 		if (user && projectId) {
+			const message = {
+				username: user.name,
+				projectId,
+				volume: newVolume
+			};
+
+			socket.emit("volChanged", message);
 			updateProject(projectId, {volume: newVolume});
 		}
 	};
@@ -213,17 +284,11 @@ const DAWLayout = props => {
 		}
 	};
 
-	const stopPlayback = () => {
-		setPlaybackStatus("Stopped");
-	};
+	const stopPlayback = () => setPlaybackStatus("Stopped");
 
 	return (
 		<>
-			<AppBar className="app-bar" position="static">
-				<Toolbar>
-					<Typography variant="h5">Relatable DAW</Typography>
-				</Toolbar>
-			</AppBar>
+			<MenuBar user={user} loggedOut={loggedOut}/>
 			<Grid columns={4} gap="1rem">
 				<Cell width={1}>
 					<Sidebar
@@ -241,7 +306,8 @@ const DAWLayout = props => {
 				<Cell width={3}>
 					<Grid rows={"1rem 1fr"} columns={1} justifyContent="start" alignContent="start" gap={"1rem"}>
 						<Cell>
-							<OptionsManager
+							<OptionsPanel
+								projectId={projectId}
 								keyCenter={keyCenter}
 								keyChanged={updateKeyCenter}
 								bpm={bpm}
@@ -253,6 +319,8 @@ const DAWLayout = props => {
 								playbackStatus={playbackStatus}
 								collaborators={collaborators}
 								collaboratorsChanged={setCollaborators}
+								collaboratorAdded={addCollaborator}
+								collaboratorRemoved={removeCollaborator}
 							/>
 						</Cell>
 						<Cell>
@@ -265,6 +333,7 @@ const DAWLayout = props => {
 								keyCenter={keyCenter}
 								bpm={bpm}
 								volume={volume}
+								synthType={synthType}
 								noteSelected={setSelectedNote}
 								noteUpdated={handleNoteUpdate}
 								noteToDelete={noteToDelete}

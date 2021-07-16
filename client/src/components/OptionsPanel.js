@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 
-import {makeStyles} from '@material-ui/core/styles';
+import {makeStyles} from "@material-ui/core/styles";
 
 import {
 	Backdrop,
@@ -19,17 +19,20 @@ import {
 	Avatar,
 	ListItem,
 	ListItemText,
-	ListItemSecondaryAction
+	ListItemSecondaryAction,
+	Divider,
+	IconButton
 } from "@material-ui/core";
 
-import PlayArrowIcon from '@material-ui/icons/PlayArrow';
-import PauseIcon from '@material-ui/icons/Pause';
-import StopIcon from '@material-ui/icons/Stop';
-import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import VolumeDown from '@material-ui/icons/VolumeDown';
-import VolumeUp from '@material-ui/icons/VolumeUp';
-import ShareIcon from '@material-ui/icons/Share';
+import PlayArrowIcon from "@material-ui/icons/PlayArrow";
+import PauseIcon from "@material-ui/icons/Pause";
+import StopIcon from "@material-ui/icons/Stop";
+import RemoveIcon from "@material-ui/icons/Remove";
+import AddIcon from "@material-ui/icons/Add";
+import VolumeDown from "@material-ui/icons/VolumeDown";
+import VolumeUp from "@material-ui/icons/VolumeUp";
+import ShareIcon from "@material-ui/icons/Share";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 import "../styles/OptionsManager.css"
 
@@ -48,7 +51,7 @@ const keys = [
 	"F"
 ];
 
-// TODO: move to CSS
+// TODO: Move to CSS
 const useStyles = makeStyles((theme) => ({
 	modal: {
 		display: "flex",
@@ -57,15 +60,16 @@ const useStyles = makeStyles((theme) => ({
 	},
 	paper: {
 		backgroundColor: "darkgray",
-		border: "2px solid #000",
-		borderRadius: "4px",
+		border: "2px solid #000000",
+		borderRadius: "0.5rem",
 		boxShadow: theme.shadows[5],
-		padding: "2rem 4rem",
+		padding: "2rem",
 	},
 }));
 
-const OptionsManager = props => {
+const OptionsPanel = props => {
 	const {
+		projectId,
 		keyCenter,
 		keyChanged,
 		bpm,
@@ -76,13 +80,15 @@ const OptionsManager = props => {
 		stopPlayback,
 		playbackStatus,
 		collaborators,
-		collaboratorsChanged
+		collaboratorAdded,
+		collaboratorRemoved
 	} = props;
 	
 	const [localBpm, setLocalBPM] = useState(120);
-	const [localVolume, setLocalVolume] = useState(100);
+	const [localVolume, setLocalVolume] = useState(0);
 	const [shareModalOpen, setShareModalOpen] = useState(false);
-	const [collaboratorEmail, setCollaboratorEmail] = useState();
+	const [collaboratorEmail, setCollaboratorEmail] = useState("");
+	const [addCollaboratorEnabled, setAddCollaboratorEnabled] = useState(false);
 
 	const classes = useStyles();
 
@@ -110,17 +116,20 @@ const OptionsManager = props => {
 	};
 
 	const handleEmailChange = evt => {
-		setCollaboratorEmail(evt.target.value);
+		const email = evt.target.value;
+		setCollaboratorEmail(email);
+		
+		const regex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+		setAddCollaboratorEnabled(email.match(regex));
 	};
 
-	const handleRoleChange = (evt, index) => {
-		const newCollaborator = collaborators[index];
-		newCollaborator.role = evt.target.value;
-		const newCollaborators = [...collaborators];
-		newCollaborators[index] = newCollaborator;
-		collaboratorsChanged(newCollaborators);
-		// TODO: update in db
-	}
+	const handleAddCollaborator = () => {
+		collaboratorAdded(projectId, collaboratorEmail);
+	};
+
+	const handleRemoveCollaborator = userId => {
+		collaboratorRemoved(projectId, userId);
+	};
 
 	return (
 		<>
@@ -157,10 +166,10 @@ const OptionsManager = props => {
 					<Grid item xs={3}>
 						<Grid container alignItems="center">
 							<Grid item xs={4}>
-								<Typography variant="h6">BPM: {localBpm}</Typography>
+								<Typography variant="h6">{localBpm} BPM</Typography>
 							</Grid>
 							<Grid item>
-								<ChevronLeftIcon/>
+								<RemoveIcon style={{marginRight: "0.5rem"}}/>
 							</Grid>
 							<Grid item xs={4}>
 								<Slider
@@ -172,29 +181,30 @@ const OptionsManager = props => {
 								/>
 							</Grid>
 							<Grid item>
-								<ChevronRightIcon/>
+								<AddIcon style={{marginLeft: "0.5rem"}}/>
 							</Grid>
 						</Grid>
 					</Grid>
 					<Grid item xs={3}>
 						<Grid container alignItems="center">
-							<Grid item xs={5}>
-								<Typography variant="h6">Volume: {localVolume}</Typography>
+							<Grid item xs={3}>
+								<Typography variant="h6">{localVolume} dB</Typography>
 							</Grid>
 							<Grid item>
-								<VolumeDown/>
+								<VolumeDown style={{marginRight: "0.5rem"}}/>
 							</Grid>
 							<Grid item xs={4}>
 								<Slider
 									value={localVolume}
-									min={0}
-									max={100}
+									min={-32}
+									max={2}
+									step={0.1}
 									onChange={handleVolumeChange}
 									onMouseUp={() => volChanged(localVolume)}
 								/>
 							</Grid>
 							<Grid item>
-								<VolumeUp/>
+								<VolumeUp style={{marginLeft: "0.5rem"}}/>
 							</Grid>
 						</Grid>
 					</Grid>
@@ -222,34 +232,47 @@ const OptionsManager = props => {
 			>
 				<Fade in={shareModalOpen}>
 					<div className={classes.paper}>
-						<Typography variant="h4">Collaborators</Typography>
-						<Typography variant="h6">Add new</Typography>
-						<TextField
-							label="Email"
-							variant="filled"
-							size="small"
-							placeholder="someone@example.com"
-							value={collaboratorEmail}
-							onChange={handleEmailChange}
-						/>
-						<List>
+						<div className="center-text">
+							<Typography variant="h4" style={{paddingBottom: "1rem"}}>Collaborators</Typography>
+							<Grid container justifyContent="center" alignItems="center" spacing={2}>
+								<Grid item>
+									<TextField
+										label="Email"
+										variant="outlined"
+										size="small"
+										placeholder="someone@example.com"
+										value={collaboratorEmail}
+										onChange={handleEmailChange}
+									/>
+								</Grid>
+								<Grid item>
+									<Button
+										variant="contained"
+										color="primary"
+										startIcon={<AddIcon/>}
+										disabled={!addCollaboratorEnabled}
+										onClick={handleAddCollaborator}>
+										Add
+									</Button>
+								</Grid>
+							</Grid>
+						</div>
+						<List style={{display: "flex", flexDirection: "column", alignItems: "stretch"}}>
 							{collaborators?.map((user, index) => (
-								<ListItem key={index}>
-									<ListItemAvatar>
-										<Avatar src={user.picture}/>
-									</ListItemAvatar>
-									<ListItemText primary={user.name} secondary={user.email}/>
-									<ListItemSecondaryAction>
-									<Select
-										value={user.role}
-										defaultValue={user.role}
-										onChange={evt => handleRoleChange(evt, index)}
-									>
-										<MenuItem value="viewer">Viewer</MenuItem>
-										<MenuItem value="editor">Editor</MenuItem>
-									</Select>
-									</ListItemSecondaryAction>
-								</ListItem>
+								<div key={index} style={{width: "24rem"}}>
+									<ListItem>
+										<ListItemAvatar>
+											<Avatar src={user.picture}/>
+										</ListItemAvatar>
+										<ListItemText primary={user.name} secondary={user.email}/>
+										<ListItemSecondaryAction>
+											<IconButton edge="end" onClick={() => handleRemoveCollaborator(user._id)}>
+												<DeleteIcon/>
+											</IconButton>
+										</ListItemSecondaryAction>
+									</ListItem>
+									<Divider/>
+								</div>
 							))}
 						</List>
 					</div>
@@ -259,4 +282,4 @@ const OptionsManager = props => {
 	);
 };
 
-export default OptionsManager;
+export default OptionsPanel;

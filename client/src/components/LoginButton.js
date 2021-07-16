@@ -1,6 +1,8 @@
 import React from "react";
 
+import {Button, Icon} from "@material-ui/core";
 import GoogleLogin from "react-google-login";
+
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -35,7 +37,17 @@ const LoginButton = ({onLogin}) => {
 	return (
 		<GoogleLogin
 			clientId={CLIENT_ID}
-			buttonText="Log in with Google"
+			// Experimental custom button CSS
+			// render={renderProps => (
+			// 	<Button
+			// 		variant="contained"
+			// 		color="primary"
+			// 		onClick={renderProps.onClick}
+			// 		disabled={renderProps.disabled}>
+			// 		Log in with Google
+			// 	</Button>
+			// )}
+			buttonText={"LOG IN WITH GOOGLE"}
 			onSuccess={googleData => handleLoginSuccess(googleData, onLogin)}
 			onFailure={handleLoginFailure}
 			isSignedIn={true}
