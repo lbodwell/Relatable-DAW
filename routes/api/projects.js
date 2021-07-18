@@ -94,8 +94,7 @@ router.post("/", ensureAuthenticated, async (req, res) => {
 	};
 
 	try {
-		await addProject(userId);
-		const projects = await getProjects(filter);
+		const projects = await addProject(filter, userId);
 
 		res.status(201).json(projects);
 	} catch (err) {
@@ -181,14 +180,9 @@ router.delete("/:id", ensureAuthenticated, async (req, res) => {
 	const projectId = req.params.id;
 
 	const filter = {
-		$and: [
-			{_id: projectId}, 
-			{
-				$or: [
-					{owner: userId},
-					{editors: userId}
-				]
-			}
+		$or: [
+			{owner: userId},
+			{editors: userId}
 		]
 	};
 	const deletionFilter = {

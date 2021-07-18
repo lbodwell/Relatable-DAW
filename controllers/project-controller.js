@@ -35,15 +35,17 @@ const getCollaborators = async filter => {
 	}
 };
 
-const addProject = async userId => {
+const addProject = async (filter, userId) => {
 	try {
-		const numProjects = await Project.countDocuments({});
+		const numProjects = await Project.countDocuments(filter);
 		const newProject = new Project({
 			name: `New Project ${numProjects + 1}`,
 			owner: userId
 		});
 
-		return await newProject.save();
+		await newProject.save();
+
+		return await getProjects(filter);
 	} catch (err) {
 		console.error(err);
 	}

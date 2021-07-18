@@ -60,7 +60,7 @@ app.use(session({
 	secret: SESSION_SECRET,
 	resave: true,
 	saveUninitialized: false,
-	// ! This is needed to prevent cookie issues but causes API routes to fail
+	// ! This is needed to prevent cookie warnings but causes API routes to fail
 	// cookie: {
 	// 	sameSite: NODE_ENV === "production" ? "none" : "lax",
 	// 	secure: NODE_ENV === "production"
