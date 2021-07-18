@@ -10,7 +10,6 @@ import {
 	List,
 	ListItem,
 	ListItemAvatar,
-	ListItemIcon,
 	ListItemSecondaryAction,
 	ListItemText,
 	Typography
@@ -107,16 +106,13 @@ const HomePage = props => {
 							{projects?.map((project, index) => (
 									<div key={index} style={{width: "24rem"}}>
 										<ListItem button onClick={() => navigateToProject(project._id)}>
-											{project.owner === user._id ?
-												<ListItemAvatar>
-													<Avatar src={user.picture}/>
-												</ListItemAvatar>
-											:
 											<ListItemAvatar>
+												{project.owner === user._id ?
+													<Avatar src={user.picture}/>
+												:
 													<MusicNoteIcon/>
-													</ListItemAvatar>
-											}
-											
+												}
+											</ListItemAvatar>
 											<ListItemText primary={project.name} secondary={(project.owner === user._id ? ("Created: " + (new Date(project.dateCreated)).toISOString().substring(0, 10)) : "Shared with you")}/>
 											<ListItemSecondaryAction>
 												<IconButton edge="end" onClick={() => deleteProject(project._id)}>

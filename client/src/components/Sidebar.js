@@ -45,6 +45,8 @@ const durationMappings = {
 
 const Sidebar = props => {
 	const {
+		user,
+		projectId,
 		projectName,
 		projectNameChanged,
 		selectedNote,
@@ -164,17 +166,20 @@ const Sidebar = props => {
 
 	return (
 		<>
-			<div className="center-text">
-				<TextField
-					label="Project name"
-					variant="outlined"
-					size="small"
-					value={localProjectName}
-					onChange={handleNameChange}
-					onBlur={evt => projectNameChanged(evt.target.value)}
-					onKeyPress={handleKeyPress}
-				/>
-			</div>
+			{(user && projectId) &&
+				<div className="center-text">
+					<TextField
+						label="Project name"
+						variant="outlined"
+						size="small"
+						value={localProjectName}
+						style={{width: "16rem", marginTop: "1rem"}}
+						onChange={handleNameChange}
+						onBlur={evt => projectNameChanged(evt.target.value)}
+						onKeyPress={handleKeyPress}
+					/>
+				</div>
+			}
 			<div className="note-editor">
 				<Typography variant="h4" style={{fontWeight: "bold", marginTop: "2rem", marginBottom: "1rem"}}>
 					Note Editor
@@ -200,12 +205,11 @@ const Sidebar = props => {
 							Clear notes
 						</Button>
 					</Grid>
-					
 				</Grid>
 				<Typography variant="h5" style={{fontWeight: "bold", marginTop: "2rem"}}>Selected note: {selectedNote?.id + 1 || "None"}</Typography>
 				{selectedNote &&
 					<div>
-						<Typography variant="h6" style={{fontWeight: "bold", marginTop: "1rem"}}>Relation</Typography>
+						<Typography variant="h6" style={{fontWeight: "bold", marginTop: "2rem", marginBottom: "1rem"}}>Relation</Typography>
 						<Grid container direction="row" justifyContent="space-evenly" spacing="2">
 							<Grid item>
 								<InputLabel id="parent" shrink>Parent note</InputLabel>
@@ -213,8 +217,9 @@ const Sidebar = props => {
 									labelId="parent"
 									value={currentParent}
 									onChange={handleParentChange}>
+									<MenuItem key={0} value={-1}>Tonic</MenuItem>
 									{parentNotes?.map((id) => (
-										<MenuItem key={id} value={id}>{`Note ${id + 1}`}</MenuItem>
+										<MenuItem key={id + 1} value={id}>{`Note ${id + 1}`}</MenuItem>
 									))}
 								</Select>
 							</Grid>
@@ -240,7 +245,7 @@ const Sidebar = props => {
 								</Select>
 							</Grid>
 						</Grid>
-						<Typography variant="h6" style={{fontWeight: "bold", marginTop: "1rem"}}>Timing</Typography>
+						<Typography variant="h6" style={{fontWeight: "bold", marginTop: "2rem", marginBottom: "1rem"}}>Timing</Typography>
 						<Grid container direction="row" justifyContent="space-evenly" spacing="2">
 							<Grid item>
 								<InputLabel id="duration" shrink>Duration</InputLabel>
@@ -271,7 +276,7 @@ const Sidebar = props => {
 							size="small"
 							color="primary"
 							startIcon={<DeleteIcon/>}
-							style={{marginTop: "2rem"}}
+							style={{marginTop: "4rem"}}
 							onClick={() => deleteRequested(selectedNote)}>
 							Delete note
 						</Button>

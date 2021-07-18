@@ -15,7 +15,7 @@ import Row from "./Row";
 import "../styles/Sequencer.css";
 
 // 12 notes in one octave times 3 full octaves (C3-C5) plus 1 for C6, all times 2 rows per note
-const numRows = (12 * 3 + 1) * 2;
+const numRows = 12 * 3 + 1;
 // 4 beats per measure times 8 measures times 4 "pixels" per beat
 const minSequencerLength = 4 * 8 * 4;
 
@@ -166,7 +166,7 @@ const Sequencer = props => {
 			noteSequence.forEach(note => {
 				numBeats += note.delay;
 				const horizontalPos = 4 * numBeats;
-				const verticalPos = -2 * Interval.semitones(Interval.distance("C6", pitches[note.id]));
+				const verticalPos = -1 * Interval.semitones(Interval.distance("C6", pitches[note.id]));
 				newPositions[note.id] = {horizontalPos, verticalPos};
 				numBeats += note.duration;
 			});
@@ -189,7 +189,6 @@ const Sequencer = props => {
 				start: pos.horizontalPos,
 				length: noteSequence[index]?.duration * 4
 			}];
-			positionsMap[pos.verticalPos + 1] = positionsMap[pos.verticalPos];
 		});
 		
 		for (let i = 0; i < numRows; i++) {
@@ -271,7 +270,7 @@ const Sequencer = props => {
 		}
 	}, [noteSequence, selectedNote, doAddNote, noteAdded, noteSelected, noteUpdated]);
 
-	// Update part on note sequence change
+	// Update part on project or note sequence change
 	useEffect(() => {
 		if (noteSequence && part.current) {
 			Tone.Transport.pause();
@@ -279,7 +278,7 @@ const Sequencer = props => {
 			part.current.dispose();
 			part.current = null;
 		}
-	}, [noteSequence]);
+	}, [noteSequence, projectId]);
 
 	// Detect user-initiated note deletion
 	// TODO: Add id cascading for remaining notes after deletion and fix duplicate component key errors

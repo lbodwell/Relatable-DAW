@@ -1,17 +1,12 @@
-.test {
-	position: sticky;
-	top: 0;
-}
-
 .piano-roll {
-	margin-top: 1rem;
+	margin-top: 2rem;
 	margin-right: 2rem;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	overflow-x: scroll;
 	overflow-y: scroll;
-	height: 83vh
+	height: 80vh
 }
 
 ::-webkit-scrollbar {

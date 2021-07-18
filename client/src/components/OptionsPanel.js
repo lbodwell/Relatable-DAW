@@ -21,7 +21,8 @@ import {
 	ListItemText,
 	ListItemSecondaryAction,
 	Divider,
-	IconButton
+	IconButton,
+	InputLabel
 } from "@material-ui/core";
 
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
@@ -34,7 +35,7 @@ import VolumeUp from "@material-ui/icons/VolumeUp";
 import ShareIcon from "@material-ui/icons/Share";
 import DeleteIcon from "@material-ui/icons/Delete";
 
-import "../styles/OptionsManager.css"
+import "../styles/OptionsPanel.css"
 
 const keys = [
 	"C",
@@ -69,6 +70,7 @@ const useStyles = makeStyles((theme) => ({
 
 const OptionsPanel = props => {
 	const {
+		user,
 		projectId,
 		keyCenter,
 		keyChanged,
@@ -142,7 +144,7 @@ const OptionsPanel = props => {
 	return (
 		<>
 			<div className="options">
-				<Grid container direction="row" justifyContent="center" alignItems="center">
+				<Grid container direction="row" justifyContent="flex-start" alignItems="flex-end">
 					<Grid item xs={1}>
 						<ButtonGroup variant="contained" size="small" color="primary">
 							<Button onClick={updatePlayback} aria-label="play/pause">
@@ -153,23 +155,17 @@ const OptionsPanel = props => {
 							</Button>
 						</ButtonGroup>
 					</Grid>
-					<Grid item xs={2}>
-						<Grid container alignItems="center" spacing={2}>
-							<Grid item>
-								<Typography variant="h6">Key:</Typography>
-							</Grid>
-							<Grid item>
-								<Select
-									labelId="keyCenter"
-									value={keyCenter}
-									onChange={evt => keyChanged(evt.target.value)}
-								>
-									{keys.map((key, index) => (
-										<MenuItem key={index} value={key}>{`${key} Major`}</MenuItem>
-									))}
-								</Select>
-							</Grid>
-						</Grid>
+					<Grid item xs={1}>
+						<InputLabel id="keyCenter" shrink>Key</InputLabel>
+						<Select
+							labelId="keyCenter"
+							value={keyCenter}
+							onChange={evt => keyChanged(evt.target.value)}
+						>
+							{keys.map((key, index) => (
+								<MenuItem key={index} value={key}>{`${key} Major`}</MenuItem>
+							))}
+						</Select>
 					</Grid>
 					<Grid item xs={3}>
 						<Grid container alignItems="center">
@@ -216,77 +212,82 @@ const OptionsPanel = props => {
 							</Grid>
 						</Grid>
 					</Grid>
-					<Grid item xs>
-						<Button
-							variant="contained"
-							color="primary"
-							startIcon={<ShareIcon/>}
-							onClick={handleOpen}
-						>
-							Share
-						</Button>
-					</Grid>
+					{(user && projectId) &&
+						<Grid item>
+							<Button
+								variant="contained"
+								color="primary"
+								startIcon={<ShareIcon/>}
+								onClick={handleOpen}
+							>
+								Share
+							</Button>
+						</Grid>
+					}
 				</Grid>
 			</div>
-			<Modal
-				className={classes.modal}
-				open={shareModalOpen}
-				onClose={handleClose}
-				closeAfterTransition
-				BackdropComponent={Backdrop}
-				BackdropProps={{
-					timeout: 500
-				}}
-			>
-				<Fade in={shareModalOpen}>
-					<div className={classes.paper}>
-						<div className="center-text">
-							<Typography variant="h4" style={{paddingBottom: "1rem"}}>Collaborators</Typography>
-							<Grid container justifyContent="center" alignItems="center" spacing={2}>
-								<Grid item>
-									<TextField
-										label="Email"
-										variant="outlined"
-										size="small"
-										placeholder="someone@example.com"
-										value={collaboratorEmail}
-										onChange={handleEmailChange}
-										onKeyPress={handleKeyPress}
-									/>
+			{(user && projectId) &&
+				<Modal
+					className={classes.modal}
+					open={shareModalOpen}
+					onClose={handleClose}
+					closeAfterTransition
+					BackdropComponent={Backdrop}
+					BackdropProps={{
+						timeout: 500
+					}}
+				>
+					<Fade in={shareModalOpen}>
+						<div className={classes.paper}>
+							<div className="center-text">
+								<Typography variant="h4" style={{paddingBottom: "1rem"}}>Collaborators</Typography>
+								<Grid container justifyContent="center" alignItems="center" spacing={2}>
+									<Grid item>
+										<TextField
+											label="Email"
+											variant="outlined"
+											size="small"
+											placeholder="someone@example.com"
+											value={collaboratorEmail}
+											style={{width: "16rem"}}
+											onChange={handleEmailChange}
+											onKeyPress={handleKeyPress}
+										/>
+									</Grid>
+									<Grid item>
+										<Button
+											variant="contained"
+											color="primary"
+											startIcon={<AddIcon/>}
+											disabled={!addCollaboratorEnabled}
+											onClick={handleAddCollaborator}>
+											Add
+										</Button>
+									</Grid>
 								</Grid>
-								<Grid item>
-									<Button
-										variant="contained"
-										color="primary"
-										startIcon={<AddIcon/>}
-										disabled={!addCollaboratorEnabled}
-										onClick={handleAddCollaborator}>
-										Add
-									</Button>
-								</Grid>
-							</Grid>
+							</div>
+							<List style={{display: "flex", flexDirection: "column", alignItems: "stretch"}}>
+								{collaborators?.map((user, index) => (
+									<div key={index} style={{width: "24rem"}}>
+										<ListItem>
+											<ListItemAvatar>
+												<Avatar src={user.picture}/>
+											</ListItemAvatar>
+											<ListItemText primary={user.name} secondary={user.email}/>
+											<ListItemSecondaryAction>
+												<IconButton edge="end" onClick={() => handleRemoveCollaborator(user._id)}>
+													<DeleteIcon/>
+												</IconButton>
+											</ListItemSecondaryAction>
+										</ListItem>
+										<Divider/>
+									</div>
+								))}
+							</List>
 						</div>
-						<List style={{display: "flex", flexDirection: "column", alignItems: "stretch"}}>
-							{collaborators?.map((user, index) => (
-								<div key={index} style={{width: "24rem"}}>
-									<ListItem>
-										<ListItemAvatar>
-											<Avatar src={user.picture}/>
-										</ListItemAvatar>
-										<ListItemText primary={user.name} secondary={user.email}/>
-										<ListItemSecondaryAction>
-											<IconButton edge="end" onClick={() => handleRemoveCollaborator(user._id)}>
-												<DeleteIcon/>
-											</IconButton>
-										</ListItemSecondaryAction>
-									</ListItem>
-									<Divider/>
-								</div>
-							))}
-						</List>
-					</div>
-				</Fade>
-			</Modal>
+					</Fade>
+				</Modal>
+			}
 		</>
 	);
 };

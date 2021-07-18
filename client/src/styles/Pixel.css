@@ -1,6 +1,6 @@
 .pixel {
 	width: 1rem;
-	height: 1rem;
+	height: 2rem;
 	transition: 1s;
 }
 
@@ -8,24 +8,6 @@
 	cursor: pointer;
 }
 
-@keyframes selected-breathe {
-	0% {
-		filter: brightness(1);
-		-webkit-filter: brightness(1);
-	}
-	100% {
-		filter: brightness(0.5);
-		-webkit-filter: brightness(0.5);
-	}
-	100% {
-		filter: brightness(1);
-		-webkit-filter: brightness(1);
-	}
-}
-
 .selected {
-	/* animation-name: selected-breathe;
-	animation-duration: 2s;
-	animation-iteration-count: infinite; */
 	filter: brightness(50%);
 }

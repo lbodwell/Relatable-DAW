@@ -306,6 +306,7 @@ const DAWLayout = props => {
 					<Grid rows={"1rem 1fr"} columns={1} justifyContent="start" alignContent="start" gap={"1rem"}>
 						<Cell>
 							<OptionsPanel
+								user={user}
 								projectId={projectId}
 								keyCenter={keyCenter}
 								keyChanged={updateKeyCenter}
