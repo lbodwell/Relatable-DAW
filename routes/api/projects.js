@@ -1,6 +1,6 @@
 const express = require("express");
 
-const {ensureAuthenticated} = require("../auth");
+const {ensureAuthenticated} = require("../auth-router");
 const {
 	getProjects,
 	getProject,
@@ -30,7 +30,7 @@ router.get("/", ensureAuthenticated, async (req, res) => {
 		res.status(200).json(projects);
 	} catch (err) {
 		console.error(err);
-		res.status(500);
+		res.status(500).send();
 	}
 });
 
@@ -55,7 +55,7 @@ router.get("/:id", ensureAuthenticated, async (req, res) => {
 		res.status(200).json(projects);
 	} catch (err) {
 		console.error(err);
-		res.status(500);
+		res.status(500).send();
 	}
 });
 
@@ -80,7 +80,7 @@ router.get("/:id/collaborators", ensureAuthenticated, async (req, res) => {
 		res.status(200).json(collaborators);
 	} catch (err) {
 		console.error(err);
-		res.status(500);
+		res.status(500).send();
 	}
 });
 
@@ -99,7 +99,7 @@ router.post("/", ensureAuthenticated, async (req, res) => {
 		res.status(201).json(projects);
 	} catch (err) {
 		console.error(err);
-		res.status(500);
+		res.status(500).send();
 	}
 });
 
@@ -119,7 +119,7 @@ router.post("/:id/collaborators", ensureAuthenticated, async (req, res) => {
 		}
 	} catch (err) {
 		console.error(err);
-		res.status(500);
+		res.status(500).send();
 	}
 });
 
@@ -145,7 +145,7 @@ router.patch("/:id", ensureAuthenticated, async (req, res) => {
 		res.status(200).json(project);
 	} catch (err) {
 		console.error(err);
-		res.status(500);
+		res.status(500).send();
 	}
 });
 
@@ -171,7 +171,7 @@ router.patch("/:id/notes", ensureAuthenticated, async (req, res) => {
 		res.status(200).json(project);
 	} catch (err) {
 		console.error(err);
-		res.status(500);
+		res.status(500).send();
 	}
 });
 
@@ -196,7 +196,7 @@ router.delete("/:id", ensureAuthenticated, async (req, res) => {
 		res.status(200).json(projects);
 	} catch (err) {
 		console.error(err);
-		res.status(500);
+		res.status(500).send();
 	}
 });
 
@@ -227,7 +227,7 @@ router.delete("/:id/collaborators", ensureAuthenticated, async (req, res) => {
 		res.status(200).json(collaborators);
 	} catch (err) {
 		console.error(err);
-		res.status(500);	
+		res.status(500).send();	
 	}
 });
 

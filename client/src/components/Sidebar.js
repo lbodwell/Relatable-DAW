@@ -58,11 +58,11 @@ const Sidebar = props => {
 
 	const [localProjectName, setLocalProjectName] = useState("");
 	const [parentNotes, setParentNotes] = useState([]);
-	const [currentParent, setCurrentParent] = useState(null);
-	const [currentInterval, setCurrentInterval] = useState(null);
-	const [currentDirection, setCurrentDirection] = useState(null);
-	const [currentDuration, setCurrentDuration] = useState(null);
-	const [currentDelay, setCurrentDelay] = useState(null);
+	const [currentParent, setCurrentParent] = useState("");
+	const [currentInterval, setCurrentInterval] = useState("");
+	const [currentDirection, setCurrentDirection] = useState("");
+	const [currentDuration, setCurrentDuration] = useState("");
+	const [currentDelay, setCurrentDelay] = useState("");
 	
 	useEffect(() => {
 		let prevNotes = [];
@@ -71,18 +71,13 @@ const Sidebar = props => {
 		}
 		setParentNotes(prevNotes);
 		if (selectedNote) {
-			setCurrentParent(selectedNote?.relation.parent);
-			setCurrentInterval(selectedNote?.relation.interval?.slice(-2));
-			setCurrentDirection(selectedNote?.relation.interval?.substring(0, 1) !== "-" ? "UP" : "DOWN");
-			setCurrentDuration(selectedNote?.duration);
-			setCurrentDelay(selectedNote?.delay);
-		} else {
-			setCurrentParent(null);
-			setCurrentInterval(null);
-			setCurrentDirection(null);
-			setCurrentDuration(null);
-			setCurrentDelay(null);
+			setCurrentParent(selectedNote.relation.parent);
+			setCurrentInterval(selectedNote.relation.interval?.slice(-2));
+			setCurrentDirection(selectedNote.relation.interval?.substring(0, 1) !== "-" ? "UP" : "DOWN");
+			setCurrentDuration(selectedNote.duration);
+			setCurrentDelay(selectedNote.delay);
 		}
+		
 	}, [selectedNote]);
 
 	useEffect(() => {
@@ -210,7 +205,7 @@ const Sidebar = props => {
 				{selectedNote &&
 					<div>
 						<Typography variant="h6" style={{fontWeight: "bold", marginTop: "2rem", marginBottom: "1rem"}}>Relation</Typography>
-						<Grid container direction="row" justifyContent="space-evenly" spacing="2">
+						<Grid container direction="row" justifyContent="center" spacing={8}>
 							<Grid item>
 								<InputLabel id="parent" shrink>Parent note</InputLabel>
 								<Select
@@ -246,7 +241,7 @@ const Sidebar = props => {
 							</Grid>
 						</Grid>
 						<Typography variant="h6" style={{fontWeight: "bold", marginTop: "2rem", marginBottom: "1rem"}}>Timing</Typography>
-						<Grid container direction="row" justifyContent="space-evenly" spacing="2">
+						<Grid container direction="row" justifyContent="center" spacing={8}>
 							<Grid item>
 								<InputLabel id="duration" shrink>Duration</InputLabel>
 								<Select

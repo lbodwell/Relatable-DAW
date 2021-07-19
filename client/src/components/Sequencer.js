@@ -53,7 +53,6 @@ const Sequencer = props => {
 		handleClearNotes
 	} = props;
 	
-	//const [synth, setSynth] = useState(null);
 	const [noteSequence, setNoteSequence] = useState([]);
 	const [pitches, setPitches] = useState([]);
 	const [positions, setPositions] = useState([]);
@@ -70,6 +69,7 @@ const Sequencer = props => {
 	// Delete a note and all its descendants from the note sequence
 	const deleteNote = useCallback(targetNoteId => {
 		let targets = [targetNoteId];
+
 		noteSequence.forEach(note => {
 			if (targets.every(target => target.id !== note.id)) {
 				targets.forEach(target => {
@@ -97,12 +97,11 @@ const Sequencer = props => {
 	useEffect(() => {
 		const newSynth = new Tone.Synth({
 			oscillator: {
-				volume: volume ?? 10,
-				count: 3,
-				spread: 40,
-				type: synthType ?? "triangle"
+				volume: volume ?? 0,
+				type: synthType ?? "sine"
 			}
 		}).toDestination();
+
 		synth.current = newSynth;
 	}, [volume, synthType]);
 
@@ -139,6 +138,7 @@ const Sequencer = props => {
 				pitch = transpose(keyCenter + "4", relation.interval);
 			} else {
 				const parentPitch = newPitches[relation.parent];
+
 				if (parentPitch) {
 					pitch = Note.simplify(transpose(newPitches[relation.parent], relation.interval));
 				} else {
@@ -152,17 +152,13 @@ const Sequencer = props => {
 		setPitches(newPitches);
 	}, [noteSequence, keyCenter]);
 
-	useEffect(() => {
-		part.current?.stop();
-		part.current = null;
-	}, [keyCenter]);
-
 	// Note positioning
 	useEffect(() => {
 		let newPositions = [];
 
 		if (pitches) {
 			let numBeats = 0;
+			
 			noteSequence.forEach(note => {
 				numBeats += note.delay;
 				const horizontalPos = 4 * numBeats;
@@ -192,7 +188,10 @@ const Sequencer = props => {
 		});
 		
 		for (let i = 0; i < numRows; i++) {
-			newRows.push({rowId: i, notePositions: positionsMap[i] ?? []});
+			newRows.push({
+				rowId: i,
+				notePositions: positionsMap[i] ?? []
+			});
 		}
 
 		setRows(newRows);
@@ -213,9 +212,20 @@ const Sequencer = props => {
 					if (note.id === noteSequence.length - 1) {
 						const timeInSeconds = Tone.Time(time).toSeconds();
 						const durationInSeconds = Tone.Time(duration).toSeconds();
-						end = Tone.Time(timeInSeconds + durationInSeconds).toBarsBeatsSixteenths();
+						const endOfLastNote = Tone.Time(timeInSeconds + durationInSeconds).toBarsBeatsSixteenths();
+						const barBeatsSixteenths = endOfLastNote.split(":");
+
+						if (barBeatsSixteenths[1] === "0" && barBeatsSixteenths[2] === "0") {
+							end = endOfLastNote;
+						} else {
+							end = (parseInt(barBeatsSixteenths[0]) + 1).toString() + ":0:0"
+						}
 					}
-					partSequence.push([time, {pitch: pitches[note.id], duration}]);
+
+					partSequence.push([time, {
+						pitch: pitches[note.id],
+						duration
+					}]);
 				});
 
 				const newPart = new Tone.Part((time, note) => {
@@ -240,7 +250,6 @@ const Sequencer = props => {
 
 	// Update note sequence on edit
 	useEffect(() => {
-		// TODO: Handle selectedNote separately from updated notes received from socket.io
 		if (prevNote !== selectedNote && selectedNote != null) {
 			let newNoteSequence = [...noteSequence];
 			newNoteSequence[selectedNote.id] = selectedNote;
@@ -270,7 +279,7 @@ const Sequencer = props => {
 		}
 	}, [noteSequence, selectedNote, doAddNote, noteAdded, noteSelected, noteUpdated]);
 
-	// Update part on project or note sequence change
+	// Update part on note sequence, or key change
 	useEffect(() => {
 		if (noteSequence && part.current) {
 			Tone.Transport.pause();
@@ -278,7 +287,7 @@ const Sequencer = props => {
 			part.current.dispose();
 			part.current = null;
 		}
-	}, [noteSequence, projectId]);
+	}, [noteSequence, keyCenter]);
 
 	// Detect user-initiated note deletion
 	// TODO: Add id cascading for remaining notes after deletion and fix duplicate component key errors

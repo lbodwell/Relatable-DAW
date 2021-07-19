@@ -52,6 +52,13 @@ const keys = [
 	"F"
 ];
 
+const synthTypes = [
+	"sine",
+	"triangle",
+	"square",
+	"sawtooth"
+];
+
 // TODO: Move to CSS
 const useStyles = makeStyles((theme) => ({
 	modal: {
@@ -74,6 +81,8 @@ const OptionsPanel = props => {
 		projectId,
 		keyCenter,
 		keyChanged,
+		synthType,
+		synthTypeChanged,
 		bpm,
 		bpmChanged,
 		volume,
@@ -133,6 +142,7 @@ const OptionsPanel = props => {
 
 	const handleAddCollaborator = () => {
 		collaboratorAdded(projectId, collaboratorEmail);
+
 		setCollaboratorEmail("");
 		setAddCollaboratorEnabled(false);
 	};
@@ -156,14 +166,29 @@ const OptionsPanel = props => {
 						</ButtonGroup>
 					</Grid>
 					<Grid item xs={1}>
-						<InputLabel id="keyCenter" shrink>Key</InputLabel>
+						<InputLabel id="key-center" shrink>Key</InputLabel>
 						<Select
-							labelId="keyCenter"
+							labelId="key-center"
 							value={keyCenter}
 							onChange={evt => keyChanged(evt.target.value)}
 						>
 							{keys.map((key, index) => (
 								<MenuItem key={index} value={key}>{`${key} Major`}</MenuItem>
+							))}
+						</Select>
+					</Grid>
+					<Grid item xs={2}>
+						<InputLabel id="synth-type" shrink>Synth</InputLabel>
+						<Select
+							labelId="synth-type"
+							value={synthType}
+							onChange={evt => synthTypeChanged(evt.target.value)}
+						>
+							{synthTypes.map((synth, index) => (
+								<MenuItem
+									key={index}
+									value={synth}>{`${synth.substring(0, 1).toUpperCase() + synth.substring(1)} Wave`}
+								</MenuItem>
 							))}
 						</Select>
 					</Grid>
@@ -201,7 +226,7 @@ const OptionsPanel = props => {
 								<Slider
 									value={localVolume}
 									min={-32}
-									max={2}
+									max={0}
 									step={0.1}
 									onChange={handleVolumeChange}
 									onMouseUp={() => volChanged(localVolume)}
@@ -240,7 +265,7 @@ const OptionsPanel = props => {
 					<Fade in={shareModalOpen}>
 						<div className={classes.paper}>
 							<div className="center-text">
-								<Typography variant="h4" style={{paddingBottom: "1rem"}}>Collaborators</Typography>
+								<Typography variant="h4" style={{fontWeight: "bold", paddingBottom: "1rem"}}>Collaborators</Typography>
 								<Grid container justifyContent="center" alignItems="center" spacing={2}>
 									<Grid item>
 										<TextField

@@ -5,6 +5,7 @@ const getUser = async filter => {
 		return await User.findOne(filter);
 	} catch (err) {
 		console.error(err);
+		return null;
 	}
 };
 
@@ -13,6 +14,7 @@ const getUsersByIds = async userIds => {
 		return await User.find({_id: {$in: userIds}});
 	} catch (err) {
 		console.error(err);
+		return null;
 	}
 };
 
@@ -24,14 +26,16 @@ const addOrUpdateUser = async (filter, update) => {
 		});
 	} catch (err) {
 		console.error(err);
+		return null;
 	}
 };
 
-const deleteUser = async filter => {
+const deleteUser = async userId => {
 	try {
-		await User.findOneAndDelete(filter);
+		return await User.findByIdAndDelete(userId);
 	} catch (err) {
 		console.error(err);
+		return null;
 	}
 };
 

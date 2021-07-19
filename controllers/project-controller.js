@@ -6,6 +6,7 @@ const getProjects = async filter => {
 		return await Project.find(filter).sort({lastEdited: -1});
 	} catch (err) {
 		console.error(err);
+		return null;
 	}
 };
 
@@ -14,6 +15,7 @@ const getProject = async filter => {
 		return await Project.findOne(filter);
 	} catch (err) {
 		console.error(err);
+		return null;
 	}
 };
 
@@ -22,16 +24,19 @@ const getCollaborators = async filter => {
 		let collaborators = [];
 
 		const project = await getProject(filter);
-		const editorIds = project.editors;
-
-		if (editorIds && editorIds.length !== 0) {
-			const editors = await getUsersByIds(editorIds);
-			editors.forEach(editor => collaborators.push({...editor._doc}));
+		
+		if (project) {
+			const editorIds = project.editors;
+			if (editorIds && editorIds.length !== 0) {
+				const editors = await getUsersByIds(editorIds);
+				editors.forEach(editor => collaborators.push({...editor._doc}));
+			}
 		}
 
 		return collaborators;
 	} catch (err) {
 		console.error(err);
+		return null;
 	}
 };
 
@@ -48,6 +53,7 @@ const addProject = async (filter, userId) => {
 		return await getProjects(filter);
 	} catch (err) {
 		console.error(err);
+		return null;
 	}
 };
 
@@ -70,6 +76,7 @@ const addCollaborator = async (filter, email) => {
 		return await getCollaborators(filter);
 	} catch (err) {
 		console.error(err);
+		return null;
 	}
 };
 
@@ -78,6 +85,7 @@ const updateProject = async (filter, update) => {
 		return await Project.findOneAndUpdate(filter, {...update, lastEdited: Date.now()});
 	} catch (err) {
 		console.error(err);
+		return null;
 	}
 };
 
@@ -94,6 +102,7 @@ const updateNoteSequence = async (filter, newNote) => {
 		return await Project.findOneAndUpdate(filter, update);
 	} catch (err) {
 		console.error(err);
+		return null;
 	}
 };
 
@@ -104,6 +113,7 @@ const deleteProject = async (filter, deletionFilter) => {
 		return await getProjects(filter);
 	} catch (err) {
 		console.error(err);
+		return null;
 	}
 };
 

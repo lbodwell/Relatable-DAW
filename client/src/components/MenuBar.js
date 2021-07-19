@@ -50,10 +50,10 @@ const MenuBar = ({user}) => {
 						</Grid>
 						{user &&
 							<Grid item>
-								<IconButton style={{backgroundColor: "darkgray", borderRadius: "2rem", padding: 0}} onClick={handleMenu}>
+								<IconButton style={{backgroundColor: "gray", borderRadius: "2rem", padding: 0}} onClick={handleMenu}>
 									<Avatar src={user.picture}/>
 								</IconButton>
-								<Menu
+								{/* <Menu
 									anchorEl={anchorEl}
 									anchorOrigin={{
 										vertical: "top",
@@ -68,7 +68,7 @@ const MenuBar = ({user}) => {
 									onClose={handleClose}
 								>
 									<MenuItem onClick={redirectToAccount}>My account</MenuItem>
-								</Menu>
+								</Menu> */}
 							</Grid>
 						}
 					</Grid>

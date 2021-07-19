@@ -11,6 +11,8 @@ const compression = require("compression");
 const methodOverride = require("method-override");
 const helmet = require("helmet");
 
+const apiRouter = require("./routes/api-router");
+const authRouter = require("./routes/auth-router");
 const {
 	PORT,
 	NODE_ENV,
@@ -18,7 +20,6 @@ const {
 	SESSION_SECRET,
 	MONGO_URI
 } = require("./config/env-handler");
-const apiRouter = require("./routes/api-router");
 
 const app = express();
 const server = http.createServer(app);
@@ -49,33 +50,25 @@ app.use(cors({
 	origin: FRONTEND_APP_URL,
 	credentials: true
 }));
-
-// app.use(cors({
-// 	credentials: false,origin: true
-// }));
 app.use(helmet({
 	contentSecurityPolicy: false
 }));
 app.use(session({
 	secret: SESSION_SECRET,
 	resave: true,
-	saveUninitialized: false,
-	// ! This is needed to prevent cookie warnings but causes API routes to fail
-	// cookie: {
-	// 	sameSite: NODE_ENV === "production" ? "none" : "lax",
-	// 	secure: NODE_ENV === "production"
-	// }
+	saveUninitialized: false
 }));
 app.use(compression());
 app.use(express.json());
 app.use(methodOverride());
 
 // Routing
-app.options('*', cors({
+app.options("*", cors({
 	origin: FRONTEND_APP_URL,
 	credentials: true
 }));
 app.use("/api", apiRouter.router);
+app.use("/auth", authRouter.router);
 app.use(express.static(path.join(__dirname, "client", "build")));
 app.use(express.static("public"));
 
@@ -138,6 +131,13 @@ io.on("connection", socket => {
 			console.log(`${username} has updated the key center in project id: ${projectId}.`);
 		}
 		socket.to(projectId).emit("keyChanged", {username, keyCenter});
+	});
+
+	socket.on("synthChanged", ({username, projectId, synthType}) => {
+		if (NODE_ENV === "development") {
+			console.log(`${username} has updated the synth type in project id: ${projectId}.`);
+		}
+		socket.to(projectId).emit("synthChanged", {username, synthType});
 	});
 
 	socket.on("bpmChanged", ({username, projectId, bpm}) => {

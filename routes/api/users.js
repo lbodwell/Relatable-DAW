@@ -1,6 +1,6 @@
 const express = require("express");
 
-const {ensureAuthenticated} = require("../auth");
+const {ensureAuthenticated} = require("../auth-router");
 const {getUser, deleteUser} = require("../../controllers/user-controller");
 
 const router = express.Router();
@@ -14,20 +14,25 @@ router.get("/:id", async (req, res) => {
 		res.status(200).json(user);
 	} catch (err) {
 		console.error(err);
-		res.status(500);
+		res.status(500).send();
 	}
 });
 
 router.delete("/", ensureAuthenticated, async (req, res) => {
-	const {userId} = req.user._id;
+	const userId = req.user._id;
 
 	try {
-		await deleteUser(userId);
+		const deletedUser = await deleteUser(userId);
 
-		res.status(204).json({success: true});
+		if (deletedUser) {
+			res.status(204).send();
+		} else {
+			res.status(500).send();
+		}
+		
 	} catch (err) {
 		console.error(err);
-		res.status(500);
+		res.status(500).send();
 	}
 });
 

@@ -4,7 +4,6 @@ const {OAuth2Client} = require("google-auth-library");
 const {getUser, addOrUpdateUser} = require("../controllers/user-controller");
 const {GOOGLE_CLIENT_ID} = require("../config/env-handler");
 
-
 const router = express.Router();
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
@@ -40,7 +39,7 @@ router.post("/google", async (req, res) => {
 		res.status(201).json(user);
 	} catch (err) {
 		console.error(err);
-		res.status(500);
+		res.status(500).send();
 	}
 });
 

@@ -38,6 +38,7 @@ const HomePage = props => {
 		});
 
 		const projects = await res.json();
+		console.log(projects);
 		if (projects) {
 			setProjects(projects);
 		} else {
@@ -87,23 +88,33 @@ const HomePage = props => {
 		}
 	};
 
+	const formatDate = date => {
+		const dateString = new Date(date).toISOString().substring(0, 10);
+
+		const month = dateString.substring(5, 7);
+		const day = dateString.substring(8, 10);
+		const year = dateString.substring(0, 4);
+
+		return `${month}/${day}/${year}`;
+	};
+
 	return (
 		<>
-		<MenuBar user={user} loggedOut={loggedOut}/>
-		<div className="center-text">
-			{user ?
-				<div>
-					<Typography variant="h4" style={{marginBottom: "1rem"}}>Projects</Typography>
-					<Button
-						variant="contained"
-						color="primary"
-						startIcon={<AddIcon/>}
-						onClick={createNewProject}>
-						New
-					</Button>
-					<div className="projects-container" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "2rem"}}>
-						<List className="projects-list" style={{display: "flex", flexDirection: "column", alignItems: "stretch"}}>
-							{projects?.map((project, index) => (
+			<MenuBar user={user} loggedOut={loggedOut}/>
+			<div className="center-text">
+				{user ?
+					<div>
+						<Typography variant="h4" style={{marginBottom: "1rem"}}>Projects</Typography>
+						<Button
+							variant="contained"
+							color="primary"
+							startIcon={<AddIcon/>}
+							onClick={createNewProject}>
+							New
+						</Button>
+						<div className="projects-container" style={{display: "flex", justifyContent: "center", alignItems: "center", marginBottom: "2rem"}}>
+							<List className="projects-list" style={{display: "flex", flexDirection: "column", alignItems: "stretch"}}>
+								{projects?.map((project, index) => (
 									<div key={index} style={{width: "24rem"}}>
 										<ListItem button onClick={() => navigateToProject(project._id)}>
 											<ListItemAvatar>
@@ -113,7 +124,10 @@ const HomePage = props => {
 													<MusicNoteIcon/>
 												}
 											</ListItemAvatar>
-											<ListItemText primary={project.name} secondary={(project.owner === user._id ? ("Created: " + (new Date(project.dateCreated)).toISOString().substring(0, 10)) : "Shared with you")}/>
+											<ListItemText 
+												primary={project.name}
+												secondary={project.owner === user._id ? "Created: " + formatDate(project.dateCreated) : "Shared with you"}
+											/>
 											<ListItemSecondaryAction>
 												<IconButton edge="end" onClick={() => deleteProject(project._id)}>
 													<DeleteIcon/>
@@ -122,28 +136,28 @@ const HomePage = props => {
 										</ListItem>
 										<Divider/>
 									</div>
-							))}
-						</List>
+								))}
+							</List>
+						</div>
+						<LogoutButton onLogout={loggedOut}/>
 					</div>
-					<LogoutButton onLogout={loggedOut}/>
-				</div>
-				:
-				<Grid container direction="column" justifyContent="center" spacing={2}>
-					<Grid item>
-						<LoginButton onLogin={loggedIn}/>
+					:
+					<Grid container direction="column" justifyContent="center" spacing={2}>
+						<Grid item>
+							<LoginButton onLogin={loggedIn}/>
+						</Grid>
+						<Grid item>
+							<Button
+								variant="contained"
+								color="primary"
+								startIcon={<ArrowForwardIcon/>}
+								onClick={() => navigateToProject(null)}>
+								Continue as guest
+							</Button>
+						</Grid>
 					</Grid>
-					<Grid item>
-						<Button
-							variant="contained"
-							color="primary"
-							startIcon={<ArrowForwardIcon/>}
-							onClick={() => navigateToProject(null)}>
-							Continue as guest
-						</Button>
-					</Grid>
-				</Grid>
-			}
-		</div>
+				}
+			</div>
 		</>
 	);
 }

@@ -36,12 +36,14 @@ const ProjectSchema = new Schema({
 	volume: {
 		type: Number,
 		required: true,
-		default: 1
+		default: 0
 	},
 	synth: {
 		type: Object,
 		required: true,
-		default: {waveType: "sine"}
+		default: {
+			waveType: "sine"
+		}
 	},
 	effects: {
 		type: [Object],

@@ -3,7 +3,7 @@ import {GoogleLogout} from "react-google-login";
 import {CLIENT_ID} from "./LoginButton";
 
 const handleLogoutSuccess = async onLogout => {
-	const res = await fetch("/api/auth/google/logout", {
+	const res = await fetch("/auth/google/logout", {
 		method: "DELETE",
 		credentials: "include"
 	});

@@ -23,13 +23,14 @@ const DAWLayout = props => {
 	const [keyCenter, setKeyCenter] = useState("C");
 	const [bpm, setBpm] = useState();
 	const [volume, setVolume] = useState();
-	const [synthType, setSynthType] = useState();
+	const [synthType, setSynthType] = useState("sine");
 	const [selectedNote, setSelectedNote] = useState(null);
 	const [noteToDelete, setNoteToDelete] = useState(null);
 	const [noteAddRequested, setNoteAddRequested] = useState(false);
 	const [clearNotesRequested, setClearNotesRequested] = useState(false);
 	const [playbackStatus, setPlaybackStatus] = useState("Paused");
 	const [collaborators, setCollaborators] = useState([]);
+	const [started, setStarted] = useState(false);
 
 	const history = useHistory();
 
@@ -79,7 +80,7 @@ const DAWLayout = props => {
 				if (tokenId) {
 					handleLoginSuccess({tokenId}, loggedIn);
 				} else {
-					history.push("/");
+					history.push("/404");
 				}
 			}
 		}
@@ -98,11 +99,13 @@ const DAWLayout = props => {
 
 			socket.on("keyChanged", ({keyCenter}) => setKeyCenter(keyCenter));
 
+			socket.on("synthChanged", ({synthType}) => setSynthType(synthType));
+
 			socket.on("bpmChanged", ({bpm}) => setBpm(bpm));
 
 			socket.on("volChanged", ({volume}) => setVolume(volume));
 		}
-	}, [user, projectId]); 
+	}, [user, projectId]);
 
 	const updateProject = async (id, update) => {
 		const res = await fetch(`/api/projects/${id}`, {
@@ -196,6 +199,7 @@ const DAWLayout = props => {
 			};
 
 			socket.emit("notesCleared", message);
+
 			updateProject(projectId, {noteSequence: []});
 		}
 	};
@@ -209,6 +213,7 @@ const DAWLayout = props => {
 			}
 
 			socket.emit("noteDeleted", message);
+
 			updateProject(projectId, {noteSequence: newSequence});
 		}
 	};
@@ -224,6 +229,7 @@ const DAWLayout = props => {
 			};
 
 			socket.emit("nameChanged", message);
+
 			updateProject(projectId, {name: newProjectName});
 		}
 	};
@@ -239,9 +245,30 @@ const DAWLayout = props => {
 			};
 
 			socket.emit("keyChanged", message);
+
 			updateProject(projectId, {keyCenter: newKeyCenter});
 		}
 	};
+
+	const updateSynthType = newSynthType => {
+		setSynthType(newSynthType);
+
+		if (user && projectId) {
+			const message = {
+				username: user.name,
+				projectId,
+				synthType: newSynthType
+			};
+
+			socket.emit("synthChanged", message);
+
+			updateProject(projectId, {
+				synth: {
+					waveType: newSynthType
+				}
+			});
+		}
+	}
 
 	const updateBpm = newBpm => {
 		setBpm(newBpm);
@@ -270,13 +297,17 @@ const DAWLayout = props => {
 			};
 
 			socket.emit("volChanged", message);
+
 			updateProject(projectId, {volume: newVolume});
 		}
 	};
 
 	const updatePlayback = async () => {
 		if (playbackStatus === "Paused" || playbackStatus === "Stopped") {
-			await Tone.start();
+			if (!started) {
+				await Tone.start();
+				setStarted(true);
+			}
 			setPlaybackStatus("Playing");
 		} else if (playbackStatus === "Playing") {
 			setPlaybackStatus("Paused");
@@ -312,11 +343,13 @@ const DAWLayout = props => {
 								keyChanged={updateKeyCenter}
 								bpm={bpm}
 								bpmChanged={updateBpm}
+								synthType={synthType}
+								synthTypeChanged={updateSynthType}
 								volume={volume}
 								volChanged={updateVolume}
+								playbackStatus={playbackStatus}
 								updatePlayback={updatePlayback}
 								stopPlayback={stopPlayback}
-								playbackStatus={playbackStatus}
 								collaborators={collaborators}
 								collaboratorsChanged={setCollaborators}
 								collaboratorAdded={addCollaborator}
